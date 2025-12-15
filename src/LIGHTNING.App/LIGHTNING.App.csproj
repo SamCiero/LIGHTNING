@@ -11,10 +11,11 @@
   <ItemGroup>
     <ProjectReference Include="..\LIGHTNING.Adapters\LIGHTNING.Adapters.csproj" />
     <ProjectReference Include="..\LIGHTNING.Core\LIGHTNING.Core.csproj" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
     <Folder Include="Views\" />
   </ItemGroup>
 
