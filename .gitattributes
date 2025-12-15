@@ -1,0 +1,27 @@
+# Auto-normalize line endings on checkout/commit
+* text=auto
+
+# Windows-native defaults for common project files
+*.sln  text eol=crlf
+*.csproj text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+*.cs   text eol=crlf
+*.xaml text eol=crlf
+*.config text eol=crlf
+*.yml  text eol=crlf
+*.yaml text eol=crlf
+*.md   text eol=crlf
+*.json text eol=crlf
+
+# Treat these as binary (no line-ending munging)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.7z  binary
+*.exe binary
+*.dll binary

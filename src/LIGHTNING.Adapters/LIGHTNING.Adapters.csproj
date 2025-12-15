@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LIGHTNING.Core\LIGHTNING.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Git\" />
+    <Folder Include="MetaF\" />
+    <Folder Include="VSCode\" />
+    <Folder Include="Processes\" />
+  </ItemGroup>
+
+</Project>

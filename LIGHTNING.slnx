@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/LIGHTNING.Adapters/LIGHTNING.Adapters.csproj" />
+  <Project Path="src/LIGHTNING.App/LIGHTNING.App.csproj" />
+  <Project Path="src/LIGHTNING.Core/LIGHTNING.Core.csproj" />
+  <Project Path="tests/LIGHTNING.Tests/LIGHTNING.Tests.csproj" />
+</Solution>
