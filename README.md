@@ -85,9 +85,18 @@ Build a Windows desktop app that:
 
 ### 3.1 Allowed roots (explicit allowlist)
 All filesystem operations MUST be scoped to these canonical root directories:
+
+**Internal (fixed, app-owned):**
+- `APP_CONFIG_DIR` (read/write): `%LocalAppData%\EmpyreanCodex\LIGHTNING\`  
+  - stores `config.yml`  
+  - may also host app-owned caches/logs under subfolders (implementation detail)
+
+**User-defined (from config.yml):**
 - `MET_SOURCE_DIR` (read-only for `.met` enumeration and reading)
 - `AF_REPO_DIR` (read/write: write `.af`, write mapping, run git)
 - `APP_WORK_DIR` (read/write: archive, cache, logs)
+
+Anything outside these roots is forbidden.
 
 ### 3.2 Canonicalization & descendant checks
 - Canonicalize via `Path.GetFullPath(...)` before every operation.
@@ -114,7 +123,7 @@ All filesystem operations MUST be scoped to these canonical root directories:
 
 ### 4.2 Core components
 - **ConfigService**
-  - Loads/saves `config.yml` in `APP_WORK_DIR`
+  - Loads/saves `config.yml` under `APP_CONFIG_DIR` (LocalAppData)
 - **MappingService**
   - Loads/saves `mapping.yml` in `AF_REPO_DIR`
 - **IngestPlanner**
@@ -232,22 +241,110 @@ Proposed shape:
 
 ## 8. Roadmap & milestones
 
-### M0 — Skeleton
-- Create solution/projects (`LIGHTNING.*`)
-- WPF shell + navigation
-- Config load/save (YAML)
-- Directory pickers and validation
-- BoundaryFileSystem scaffolding + unit tests
+**Current milestone:** **M1 — MetaF bootstrap (vertical slice)**  
+**Last completed:** **M0 — Skeleton** ✅ (2025-12-15)
 
-Deliverable: app launches, stores config, validates paths.
+### M0 — Skeleton ✅ Complete (2025-12-15)
 
-### M1 — MetaF bootstrap (vertical slice)
-- Implement cache layout
-- Implement “clone + build/publish” strategy
-- Record MetaF SHA + resolved executable path
-- UI: MetaF status panel and “Rebuild/Update” action
+**Deliverable (met):** app launches, stores config, validates paths, boundary scaffolding exists, tests green.
 
-Deliverable: MetaF reproducibly available locally.
+**Completed checklist**
+- [x] Create solution/projects (`LIGHTNING.*`)
+- [x] WPF app boots and shows Setup UI
+- [x] Config load/save (YAML) working
+- [x] Directory pickers + validation errors surfaced
+- [x] BoundaryFileSystem scaffolding (allowlist + reparse-point checks)
+- [x] Boundary gating in app startup (config-only allowlist, then runtime allowlist after valid config)
+- [x] xUnit test harness in place
+- [x] Core validation + boundary tests passing (`dotnet test` green)
+
+**Deferred from M0 (intentional)**
+- [ ] Navigation framework (Dashboard/Preview/Progress views) beyond the Setup screen
+- [ ] Atomic/transactional writes + rollback rules (target: M5)
+- [ ] Deep reparse-point coverage (full enumeration/copy policies) beyond baseline checks
+- [ ] Plan Preview + per-run logs (next: M2, optional pre-work in M1/M2)
+
+---
+
+### M1 — MetaF bootstrap (vertical slice) ⏳ In progress
+
+**Objective:** MetaF is reproducibly available locally (pinned SHA + resolved executable path) and visible/controllable in UI.
+
+**Design decisions (M1 scope)**
+- MetaF is installed into an **app-owned cache** under an allowed root (prefer: `APP_WORK_DIR\cache\metaf\...`).
+- Installation is **pinned**:
+  - record resolved MetaF commit SHA (and ref used)
+  - record resolved executable path (or entry command)
+- Bootstrap is **idempotent**:
+  - if already installed and SHA matches → no-op
+  - explicit “Rebuild/Update” action forces refresh
+
+**Concrete checklist**
+1) **Config schema wiring (minimal fields for M1)**
+   - [ ] Ensure `config.yml` includes: `metaf_git_url`, `metaf_ref`, `metaf_exe_path` (or equivalent)
+   - [ ] Default values: `metaf_git_url=<PLACEHOLDER>`, `metaf_ref=main` (or pinned SHA), `metaf_exe_path=""`
+   - [ ] Validation rules:
+     - [ ] URL non-empty and well-formed enough for git
+     - [ ] Ref non-empty
+     - [ ] Exe path must be inside allowed roots when set
+
+2) **Cache layout + invariants**
+   - [ ] Define cache roots (under `APP_WORK_DIR`):
+     - [ ] `APP_WORK_DIR\cache\metaf\repo\` (git clone)
+     - [ ] `APP_WORK_DIR\cache\metaf\build\` (intermediate)
+     - [ ] `APP_WORK_DIR\cache\metaf\bin\<sha>\` (published output per resolved SHA)
+   - [ ] Define a single “active” pointer:
+     - [ ] store `metaf_sha` and `metaf_exe_path` in config
+     - [ ] verify that `metaf_exe_path` exists before marking “Ready”
+
+3) **Git clone/update implementation**
+   - [ ] Implement `MetaFInstaller` (Core interface + Adapters implementation)
+   - [ ] Use `git` CLI via adapter:
+     - [ ] clone if missing
+     - [ ] fetch
+     - [ ] checkout ref
+     - [ ] resolve commit SHA (`git rev-parse HEAD`)
+   - [ ] Enforce boundary:
+     - [ ] repo clone path is inside `APP_WORK_DIR`
+     - [ ] no writes outside allowlist roots
+
+4) **Build/publish strategy**
+   - [ ] Define build command (placeholder until MetaF repo specifics are known):
+     - [ ] `dotnet publish` (or repo-specific script) into `bin\<sha>\`
+   - [ ] Capture stdout/stderr + exit codes
+   - [ ] Timeout + cancellation hooks (basic; full UX in M5)
+
+5) **Executable resolution**
+   - [ ] Determine executable path deterministically:
+     - [ ] locate produced `.exe` (or entry DLL) under `bin\<sha>\`
+     - [ ] store in config: `metaf_exe_path`
+   - [ ] Verify the stored path is inside allowlisted roots
+
+6) **UI: MetaF status panel**
+   - [ ] Add a MetaF status panel (Setup or Dashboard):
+     - [ ] “Not installed / Installing / Ready / Failed”
+     - [ ] show: `metaf_ref`, resolved `metaf_sha`, `metaf_exe_path`
+   - [ ] Add actions:
+     - [ ] “Install/Update”
+     - [ ] “Rebuild” (force rebuild from current ref)
+
+7) **Logging + reproducibility**
+   - [ ] Write install logs under `APP_WORK_DIR\logs\metaf\...`
+   - [ ] Record resolved SHA + tool version details per install attempt
+
+8) **Tests (M1)**
+   - [ ] Unit test: cache path composition is deterministic
+   - [ ] Unit test: boundary rejects cache paths outside allowlist
+   - [ ] Integration-style (optional now, required by M5): fake process runner simulates build output and exe resolution
+
+**M1 exit criteria**
+- MetaF can be installed on a fresh machine with only `git` + `.NET SDK` present.
+- App records:
+  - resolved MetaF SHA
+  - resolved executable path
+- UI reports Ready/Failed reliably and provides a rebuild/update action.
+
+---
 
 ### M2 — `.met → .af` end-to-end
 - Implement planner + preview grid

@@ -1,0 +1,81 @@
+<UserControl x:Class="LIGHTNING.App.Views.SetupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:LIGHTNING.App.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:DesignSetupVM, IsDesignTimeCreatable=True}">
+
+  <Grid Margin="16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <StackPanel Grid.Row="0" Margin="0,0,0,12">
+      <TextBlock Text="Setup" FontSize="22" FontWeight="SemiBold" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" Margin="0,0,0,12">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="220" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="110" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="MET_SOURCE_DIR" />
+      <TextBox   Grid.Row="0" Grid.Column="1" Margin="0,0,8,8"
+                 Text="{Binding MetSourceDir, UpdateSourceTrigger=PropertyChanged}" />
+      <Button    Grid.Row="0" Grid.Column="2" Margin="0,0,0,8" Content="Browse…"
+                 Command="{Binding BrowseMetSourceDirCommand}" />
+
+      <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="AF_REPO_DIR" />
+      <TextBox   Grid.Row="1" Grid.Column="1" Margin="0,0,8,8"
+                 Text="{Binding AfRepoDir, UpdateSourceTrigger=PropertyChanged}" />
+      <Button    Grid.Row="1" Grid.Column="2" Margin="0,0,0,8" Content="Browse…"
+                 Command="{Binding BrowseAfRepoDirCommand}" />
+
+      <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Center" Text="APP_WORK_DIR" />
+      <TextBox   Grid.Row="2" Grid.Column="1" Margin="0,0,8,0"
+                 Text="{Binding AppWorkDir, UpdateSourceTrigger=PropertyChanged}" />
+      <Button    Grid.Row="2" Grid.Column="2" Content="Browse…"
+                 Command="{Binding BrowseAppWorkDirCommand}" />
+    </Grid>
+
+    <Border Grid.Row="2" Padding="12" BorderThickness="1" CornerRadius="6">
+      <StackPanel>
+        <TextBlock Text="Validation" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBlock Text="{Binding ValidationSummary}" Opacity="0.75" Margin="0,0,0,8" />
+
+        <ItemsControl ItemsSource="{Binding ValidationErrors}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Separator Margin="0,10,0,10" />
+
+        <Button Content="CONFIG FILE"
+        Command="{Binding OpenConfigFolderCommand}"
+        FontWeight="SemiBold"
+        FontSize="12"
+        Padding="4,4"
+        HorizontalAlignment="Left"
+        Margin="0,0,0,8"
+        BorderThickness="1"
+        Cursor="Arrow" />
+
+        <TextBlock Text="{Binding ConfigPath}" Opacity="0.75" TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

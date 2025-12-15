@@ -1,22 +1,29 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LIGHTNING.Adapters\LIGHTNING.Adapters.csproj" />
-    <ProjectReference Include="..\LIGHTNING.Core\LIGHTNING.Core.csproj" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-  </ItemGroup>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Views\" />
-  </ItemGroup>
+    <!-- Force XAML to be treated as WPF compile inputs -->
+    <ItemGroup>
+        <ApplicationDefinition Update="App.xaml" />
+        <Page Update="MainWindow.xaml" />
+        <Page Update="Views\SetupView.xaml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+        <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\LIGHTNING.Adapters\LIGHTNING.Adapters.csproj" />
+        <ProjectReference Include="..\LIGHTNING.Core\LIGHTNING.Core.csproj" />
+    </ItemGroup>
 
 </Project>
