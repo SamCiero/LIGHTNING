@@ -106,7 +106,7 @@ All filesystem operations MUST be scoped to these canonical root directories:
 ## 4. Solution architecture (modular monolith)
 
 ### 4.1 Visual Studio solution layout (proposed)
-- `LIGHTNING.sln`
+- `LIGHTNING.slnx`
   - `LIGHTNING.App` (WPF UI)
   - `LIGHTNING.Core` (domain logic: plans, mapping, policies)
   - `LIGHTNING.Adapters` (filesystem, process runner, git runner, VS Code launcher)
