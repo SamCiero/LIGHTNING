@@ -1,6 +1,21 @@
+# Visual Studio / IDE
 .vs/
-bin/
-obj/
-TestResults/
 *.user
 *.suo
+
+# Build outputs (repo-wide)
+bin/
+obj/
+
+# Test outputs
+TestResults/
+
+# Publish / packaging outputs (repo-owned tooling)
+artifacts/
+
+# Common local clutter
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db

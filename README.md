@@ -11,7 +11,7 @@ Primary toolchain: Visual Studio (C#/.NET), WPF (XAML), YAML config
 ## 0. Executive summary
 
 Build a Windows desktop app that:
-- Bootstraps **MetaF** locally on first run (clone/build into an app-owned cache directory).
+- Bootstraps **MetaF** locally on first run (clone/install into an app-owned cache directory).
 - Converts `.met → .af` and `.af → .met` via MetaF on user command.
 - Archives input/output `.met` files locally (not in Git).
 - Commits only `.af` (and `mapping.yml`) into a user-selected Git repo.
@@ -49,7 +49,8 @@ Build a Windows desktop app that:
   - `APP_WORK_DIR` (app-owned; cache + archive + logs; default under `%LocalAppData%`)
 - FR-02: First-run MetaF bootstrap:
   - Git URL + ref (branch/tag/SHA)
-  - Build/publish into cache; record resolved MetaF SHA and executable path
+  - Install into app-owned cache (under `APP_WORK_DIR`)
+  - Record resolved MetaF SHA and resolved executable path
 - FR-03: Convert `.met → .af` (batch):
   - Enumerate `.met` in source dir
   - Copy each `.met` into local archive
@@ -78,6 +79,8 @@ Build a Windows desktop app that:
 - NFR-05: Safe failure handling:
   - No partial git commit if job fails mid-run
   - Clear UI error surface with access to logs
+- NFR-06: Distribution: `LIGHTNING.App` MUST be shippable as a **self-contained** Windows app (no preinstalled .NET Desktop Runtime required).
+- NFR-07: Distribution (future): `LIGHTNING.App` SHOULD support **self-contained + single-file** publish (tracked milestone item).
 
 ---
 
@@ -89,7 +92,7 @@ All filesystem operations MUST be scoped to these canonical root directories:
 **Internal (fixed, app-owned):**
 - `APP_CONFIG_DIR` (read/write): `%LocalAppData%\EmpyreanCodex\LIGHTNING\`  
   - stores `config.yml`  
-  - may also host app-owned caches/logs under subfolders (implementation detail)
+  - may also host app-owned metadata under subfolders (implementation detail)
 
 **User-defined (from config.yml):**
 - `MET_SOURCE_DIR` (read-only for `.met` enumeration and reading)
@@ -131,15 +134,19 @@ Anything outside these roots is forbidden.
 - **PipelineRunner**
   - Executes `RunPlan` with progress + cancellation
 - **MetaFInstaller**
-  - Ensures MetaF is available and pinned (clone/build/publish)
+  - Ensures MetaF is available and pinned (clone/install strategies; records SHA + exe path)
 - **MetaFRunner**
   - Invokes MetaF; captures stdout/stderr; enforces timeouts
 - **GitAdapter**
   - Stages and commits exactly what the plan says
 - **BoundaryFileSystem**
-  - The only route to IO; enforces allowlist + reparse policy
+  - The only route to user-data IO; enforces allowlist + reparse policy
+- **SystemProbe**
+  - Read-only system detection (git/dotnet/code presence + versions) and MetaF runtime compatibility hints
 - **VSCodeLauncher**
   - Opens repo and handles extension recommendations/installation (Section 6)
+- **DependencyInstaller** (M6)
+  - Optional managed installs of prerequisites into `APP_WORK_DIR` (system-first, managed fallback)
 
 ### 4.3 MVVM UI pattern
 - ViewModels: `SetupVM`, `DashboardVM`, `RunPreviewVM`, `RunProgressVM`, `SettingsVM`, `LogsVM`
@@ -157,15 +164,26 @@ Fields (minimum):
 - `met_source_dir`
 - `af_repo_dir`
 - `app_work_dir`
+
+MetaF (M1):
 - `metaf_git_url`
-- `metaf_ref` (branch/tag/SHA)
+- `metaf_ref` (branch/tag/SHA requested)
+- `metaf_sha` (resolved pinned commit SHA)
 - `metaf_exe_path` (resolved cached executable)
+- `metaf_install_mode` (`repo_release_zip|dotnet_publish`)
+
+Policies:
 - `reparse_point_policy` (`block` default)
 - `conflict_policy` (`skip|overwrite|version_suffix`)
 - `git_push_policy` (`never|manual|auto`)
+
+VS Code:
 - `vscode_required_extensions` (list of extension IDs)
 - `vscode_preferred_profile` (optional)
 - `manage_vscode_workspace_files` (`false` default; controls writing `.vscode/extensions.json`)
+
+Managed dependencies (M6; optional, opt-in):
+- `allow_managed_dependencies` (`false` default)
 
 ### 5.2 mapping.yml (repo, committed)
 Stored under: `<AF_REPO_DIR>\mapping.yml`
@@ -237,6 +255,14 @@ Proposed shape:
   - must be a git repo
   - optional `require_clean_repo` setting (default: false)
 
+### 7.3 Distribution (publishing)
+- Short-term default: **self-contained folder publish** (most reliable).
+- Long-term goal: **self-contained + single-file publish** (tracked milestone item; target: M5).
+
+Notes:
+- Self-contained ensures the app runs without a preinstalled .NET Desktop Runtime.
+- Single-file is packaging polish and requires extra validation (WPF + native deps).
+
 ---
 
 ## 8. Roadmap & milestones
@@ -271,31 +297,33 @@ Proposed shape:
 **Objective:** MetaF is reproducibly available locally (pinned SHA + resolved executable path) and visible/controllable in UI.
 
 **Design decisions (M1 scope)**
-- MetaF is installed into an **app-owned cache** under an allowed root (prefer: `APP_WORK_DIR\cache\metaf\...`).
+- MetaF is installed into an **app-owned cache** under an allowed root: `APP_WORK_DIR\cache\metaf\...`.
 - Installation is **pinned**:
-  - record resolved MetaF commit SHA (and ref used)
-  - record resolved executable path (or entry command)
+  - record requested `metaf_ref`
+  - record resolved `metaf_sha` (true pin)
+  - record resolved `metaf_exe_path`
 - Bootstrap is **idempotent**:
   - if already installed and SHA matches → no-op
   - explicit “Rebuild/Update” action forces refresh
+  - internal API supports a `forceRebuild` flag (debug wiring can come later)
+- Bootstrap logs retained: keep last **100** attempts.
 
 **Concrete checklist**
 1) **Config schema wiring (minimal fields for M1)**
-   - [ ] Ensure `config.yml` includes: `metaf_git_url`, `metaf_ref`, `metaf_exe_path` (or equivalent)
-   - [ ] Default values: `metaf_git_url=<PLACEHOLDER>`, `metaf_ref=main` (or pinned SHA), `metaf_exe_path=""`
+   - [ ] Ensure `config.yml` includes: `metaf_git_url`, `metaf_ref`, `metaf_sha`, `metaf_exe_path`, `metaf_install_mode`
+   - [ ] Default values: `metaf_git_url=<PLACEHOLDER>`, `metaf_ref=main`, `metaf_sha=""`, `metaf_exe_path=""`, `metaf_install_mode=repo_release_zip`
    - [ ] Validation rules:
      - [ ] URL non-empty and well-formed enough for git
      - [ ] Ref non-empty
-     - [ ] Exe path must be inside allowed roots when set
+     - [ ] If set, `metaf_exe_path` must be a descendant of `APP_WORK_DIR`
 
 2) **Cache layout + invariants**
    - [ ] Define cache roots (under `APP_WORK_DIR`):
      - [ ] `APP_WORK_DIR\cache\metaf\repo\` (git clone)
-     - [ ] `APP_WORK_DIR\cache\metaf\build\` (intermediate)
-     - [ ] `APP_WORK_DIR\cache\metaf\bin\<sha>\` (published output per resolved SHA)
+     - [ ] `APP_WORK_DIR\cache\metaf\install\<sha>\` (installed output per resolved SHA)
    - [ ] Define a single “active” pointer:
      - [ ] store `metaf_sha` and `metaf_exe_path` in config
-     - [ ] verify that `metaf_exe_path` exists before marking “Ready”
+     - [ ] verify `metaf_exe_path` exists before marking “Ready”
 
 3) **Git clone/update implementation**
    - [ ] Implement `MetaFInstaller` (Core interface + Adapters implementation)
@@ -305,109 +333,18 @@ Proposed shape:
      - [ ] checkout ref
      - [ ] resolve commit SHA (`git rev-parse HEAD`)
    - [ ] Enforce boundary:
-     - [ ] repo clone path is inside `APP_WORK_DIR`
+     - [ ] clone/install paths are descendants of `APP_WORK_DIR`
      - [ ] no writes outside allowlist roots
 
-4) **Build/publish strategy**
-   - [ ] Define build command (placeholder until MetaF repo specifics are known):
-     - [ ] `dotnet publish` (or repo-specific script) into `bin\<sha>\`
-   - [ ] Capture stdout/stderr + exit codes
-   - [ ] Timeout + cancellation hooks (basic; full UX in M5)
+4) **Install strategy (pluggable)**
+   - [ ] Support install modes:
+     - [ ] `repo_release_zip`: select `releases\*.zip` deterministically, extract into `install\<sha>\`, resolve exe
+     - [ ] `dotnet_publish`: run `dotnet publish` into `install\<sha>\`, resolve exe
+   - [ ] Record mode used and selected artifact in install log
 
 5) **Executable resolution**
-   - [ ] Determine executable path deterministically:
-     - [ ] locate produced `.exe` (or entry DLL) under `bin\<sha>\`
-     - [ ] store in config: `metaf_exe_path`
-   - [ ] Verify the stored path is inside allowlisted roots
+   - [ ] Determine executable path deterministically under `install\<sha>\`
+   - [ ] Store absolute `metaf_exe_path` in config
+   - [ ] Verify it is a descendant of `APP_WORK_DIR`
 
-6) **UI: MetaF status panel**
-   - [ ] Add a MetaF status panel (Setup or Dashboard):
-     - [ ] “Not installed / Installing / Ready / Failed”
-     - [ ] show: `metaf_ref`, resolved `metaf_sha`, `metaf_exe_path`
-   - [ ] Add actions:
-     - [ ] “Install/Update”
-     - [ ] “Rebuild” (force rebuild from current ref)
-
-7) **Logging + reproducibility**
-   - [ ] Write install logs under `APP_WORK_DIR\logs\metaf\...`
-   - [ ] Record resolved SHA + tool version details per install attempt
-
-8) **Tests (M1)**
-   - [ ] Unit test: cache path composition is deterministic
-   - [ ] Unit test: boundary rejects cache paths outside allowlist
-   - [ ] Integration-style (optional now, required by M5): fake process runner simulates build output and exe resolution
-
-**M1 exit criteria**
-- MetaF can be installed on a fresh machine with only `git` + `.NET SDK` present.
-- App records:
-  - resolved MetaF SHA
-  - resolved executable path
-- UI reports Ready/Failed reliably and provides a rebuild/update action.
-
----
-
-### M2 — `.met → .af` end-to-end
-- Implement planner + preview grid
-- Implement pipeline runner (copy to archive, run MetaF, write `.af` to repo)
-- Add per-run logs + results summary
-- Implement Git staging + commit of `.af` + `mapping.yml` only
-
-Deliverable: primary workflow works and commits `.af`.
-
-### M3 — Round-trip `.af → .met`
-- Implement `.af → .met` plan + execution
-- Archive output `.met` locally with traceability
-- Update mapping metadata accordingly
-
-Deliverable: round-trip conversions supported without committing `.met`.
-
-### M4 — VS Code launcher
-- Implement `VSCodeLauncher`:
-  - detect `code`
-  - best-effort extension install
-  - open repo
-- Implement `.vscode/extensions.json` management (feature-flagged)
-
-Deliverable: one-click “Open Workspace” with extension recommendations/install attempts.
-
-### M5 — Hardening
-- Cancellation and safe rollback rules:
-  - write outputs to temp then move
-  - commit only after all conversions succeed (or chunked batches)
-- Performance improvements for large sets (optional bounded concurrency)
-- UX polish: progress, filters, conflict resolution UI
-- Integration tests (temp repos + fake MetaF runner)
-
-Deliverable: stable, safe, pleasant.
-
----
-
-## 9. Risks & mitigations
-
-- **R1: VS Code extension “active” control is limited.**
-  - Mitigation: `.vscode/extensions.json` + best-effort CLI install.
-- **R2: MetaF build process changes.**
-  - Mitigation: isolate bootstrap behind an interface; pin MetaF SHA.
-- **R3: Path escape via symlinks/junctions.**
-  - Mitigation: block reparse points; canonical descendant checks; centralize IO.
-- **R4: Git repo state surprises (dirty working tree).**
-  - Mitigation: strict staging list + UI warnings + optional “require clean repo”.
-- **R5: Partial conversions create inconsistent mapping.**
-  - Mitigation: plan-first execution; transactional mapping update (temp write then replace).
-
----
-
-## 10. Definition of Done (MVP)
-- User configures directories and MetaF source/ref.
-- App installs/builds MetaF into its own cache.
-- User previews a `.met → .af` run.
-- Running produces `.af` and commits them to repo with updated `mapping.yml`.
-- No IO occurs outside allowlisted roots; reparse points blocked.
-- VS Code button opens the repo; required extensions are recommended and install attempted.
-
----
-
-## Appendix A — Terminology
-- **Archive:** local-only store of `.met` keyed by hash; not committed.
-- **Mapping:** committed YAML describing stable `.met` identity and corresponding `.af` path in repo.
-- **Plan:** immutable list of intended operations produced by planner before execution.
+6) **Prereqs +
