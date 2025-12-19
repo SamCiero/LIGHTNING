@@ -1,0 +1,11 @@
+VERSION: 1
+CREATED_UTC: "2025-12-17T00:00:00Z"
+MET_SOURCE_ROOT_FINGERPRINT: "<FINGERPRINT>"
+
+ITEMS:
+  - MET_ID: "sha256:<MET_SHA256_HEX>"
+    MET_REL: "Foo.met"                   # last-seen filename
+    AF_REL: "Foo.af"                     # initially repo root
+    AF_SHA256: "sha256:<AF_SHA256_HEX>"  # enables robust relink after move/rename
+    LAST_METAF_SHA: "<PINNED_METAF_SHA>"
+    LAST_RUN_UTC: "2025-12-17T00:00:00Z"

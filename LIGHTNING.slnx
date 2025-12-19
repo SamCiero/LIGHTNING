@@ -4,7 +4,12 @@
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
     <File Path="Directory.Build.props" />
-    <File Path="README.md" />
+    <File Path="docs/config.example.yaml" />
+    <File Path="docs/mapping.example.yaml" />
+    <File Path="docs/roadmap.md" />
+    <File Path="docs/spec.md" />
+    <File Path="tools/publish.cmd" />
+    <File Path="tools/publish.ps1" />
   </Folder>
   <Project Path="src/LIGHTNING.Adapters/LIGHTNING.Adapters.csproj" />
   <Project Path="src/LIGHTNING.App/LIGHTNING.App.csproj" />

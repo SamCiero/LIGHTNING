@@ -1,0 +1,34 @@
+VERSION: 1
+
+MET_SOURCE_DIR: "<MET_SOURCE_DIR>"          # flat input folder of .met files
+AF_REPO_DIR: "<AF_REPO_DIR>"                # user git repo root
+APP_WORK_DIR: "<APP_WORK_DIR>"              # app cache + logs + deps + archive
+
+METAF_GIT_URL: "<METAF_GIT_URL>"
+METAF_INSTALL_MODE: "repo_release_zip"      # preferred; fallback: dotnet_publish
+METAF_REF: "<METAF_REF>"
+METAF_SHA: "<PINNED_METAF_SHA>"
+METAF_EXE_PATH: "<APP_WORK_DIR>\\metaf\\<PINNED_METAF_SHA>\\MetaF.exe"
+
+ALLOW_MANAGED_DEPENDENCIES: true
+MANAGED_DOTNET_ROOT: "<OPTIONAL_OVERRIDE_OR_EMPTY>"
+
+MANAGE_VSCODE_WORKSPACE_FILES: true
+VSCODE_REQUIRED_EXTENSIONS:
+  - "ms-dotnettools.csharp"
+VSCODE_PREFERRED_PROFILE: "<OPTIONAL_PROFILE_NAME>"
+
+REQUIRE_CLEAN_REPO: true
+GIT_PUSH_POLICY: "never"
+CONFLICT_POLICY: "suffix"
+
+# Stored globally, per AF_REPO_DIR (first run per repo and whenever missing for that repo)
+REPO_PROFILES:
+  - AF_REPO_DIR: "<AF_REPO_DIR>"
+    GIT_AUTHOR_NAME: "<AUTHOR_NAME>"
+    GIT_AUTHOR_EMAIL: "<AUTHOR_EMAIL>"
+
+REPARSE_POINT_POLICY: "block_writes_allow_reads"
+
+ARCHIVE_RETENTION_DAYS: 30
+MAX_ARCHIVE_GB: 25
