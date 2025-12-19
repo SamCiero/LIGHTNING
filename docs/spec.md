@@ -36,9 +36,9 @@ Build a Windows desktop app that:
 
 ### 1.2 Non-goals (initially)
 
-- No cloud sync.
+- No bespoke cloud sync (only standard Git operations required for MetaF bootstrap and git remote push).
 - No multi-user collaboration features.
-- No auto-push to remote by default.
+- No background/periodic push; any `git push` happens only at the end of a user-initiated run and is governed by `GIT_PUSH_POLICY`.
 
 ---
 
@@ -130,7 +130,7 @@ Policy goal: prevent path-escape and “surprise writes” via symlinks/junction
 - Never run `git add *`.
 - Only stage explicit planned outputs: `git add <file1> <file2> ...`
 - Only commit if all conversions succeed.
-- Default: `GIT_PUSH_POLICY: never`.
+- Default: `GIT_PUSH_POLICY: always`.
 
 ---
 
@@ -274,7 +274,7 @@ VS Code convenience:
 Git behavior:
 
 - `REQUIRE_CLEAN_REPO` (`true/false`)
-- `GIT_PUSH_POLICY` (default `never`)
+- `GIT_PUSH_POLICY` (default `always`; supported: `always`, `never`)
 - `CONFLICT_POLICY` (default `suffix`)
 
 Per-repo git author identity (stored globally in `config.yaml`):
@@ -564,6 +564,46 @@ If `REQUIRE_CLEAN_REPO: false` and repo is not clean:
 
 - Proceed, but stage only planned outputs.
 - Warn prominently in UI and logs that the working tree was not clean.
+
+
+### 10.5 Push to remote (policy-driven)
+
+`GIT_PUSH_POLICY` controls whether LIGHTNING attempts to push after a successful commit.
+
+Supported values:
+
+- `always`
+- `never`
+
+Rules:
+
+- Push is attempted **only** if the run produced a commit (Section 10.2) and only after all conversions succeed and publishing completes (Section 11).
+- If `GIT_PUSH_POLICY: never`, do not run `git push`.
+- If `GIT_PUSH_POLICY: always`, attempt exactly one push, **after** the commit:
+  - Do not push tags.
+  - Capture stdout/stderr in the run log.
+
+Remote/branch selection (deterministic):
+
+1. Determine the current branch name:
+   - `git rev-parse --abbrev-ref HEAD`
+   - If the result is `HEAD` (detached), skip pushing and emit a stable warning/error code in UI and logs.
+2. Prefer the configured upstream if present:
+   - `git rev-parse --symbolic-full-name @{u}`
+   - If it resolves to `refs/remotes/<remote>/<branch>`, push to `<remote>` and destination `<branch>`.
+3. Otherwise, fall back to `origin`:
+   - Require that remote `origin` exists; if not, skip pushing and emit a stable warning/error code.
+   - Push to destination branch equal to the current branch name.
+
+Push command:
+
+- `git push <remote> HEAD:<dest-branch>`
+
+Failure semantics:
+
+- If push fails, the commit remains (no rollback attempt).
+- The run completes with a prominent warning and a stable error code; logs include push output.
+
 
 ---
 
