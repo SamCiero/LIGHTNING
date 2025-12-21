@@ -64,7 +64,7 @@ body:
         - label: "Add gating flags for VS Code workspace management and other optional integrations (non‑blocking)"
         - label: "Ensure all runs are explicitly user‑triggered; implement run‑lock to prevent concurrent operations"
         - label: "Offload heavy work (scanning/validation) off the UI thread to maintain responsiveness"
-        - label: "Add per‑run logging under `APP_WORK_DIR\logs` and UI affordance to open logs"
+        - label: "Add per‑run logging under `APP_WORK_DIR\\logs` and UI affordance to open logs"
         - label: "Add unit tests covering boundary rules and configuration validation"
 
   - type: checkboxes
