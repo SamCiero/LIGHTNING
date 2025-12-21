@@ -1,11 +1,10 @@
-name: "M2 — Forward Conversion (.met→.af) + Git Publish"
-description: "Plan/Preview → approve → archive → stage → publish → Git for `.met→.af`."
-title: "M2 — Forward Conversion Pipeline (.met→.af) + Git Publish"
+name: "M2 — Forward Conversion (.met→.af)"
+description: "Implement deterministic planning, preview and forward conversion from .met to .af with staging, archiving and Git publishing."
+title: "M2 — Forward Conversion (.met→.af)"
 labels:
   - "milestone:M2"
-  - "area:pipeline"
+  - "area:forward-conversion"
   - "area:planner"
-  - "area:preview"
   - "area:git"
   - "tests"
   - "docs"
@@ -14,7 +13,8 @@ body:
     attributes:
       value: |
         ## Goal
-        Deliver deterministic Plan/Preview → approve → archive → stage → publish → Git for `.met→.af`.
+        Deliver the deterministic `.met→.af` conversion workflow.  
+        This milestone scans the `MET_SOURCE_DIR` for `.met` files, loads and strictly validates `mapping.yaml`, builds a deterministic Plan and Preview enumerating all writes and Git side effects, archives `.met` inputs before conversion, invokes MetaF to generate `.af` outputs into staging, updates `mapping.yaml`, applies conflict policies and publishes outputs to `AF_REPO_DIR` via atomic operations with deterministic commit messages.  Archive retention rules and run exclusivity locks must be enforced.
 
   - type: textarea
     id: context
@@ -22,8 +22,8 @@ body:
       label: Context / Links
       description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
       placeholder: |
-        - Spec: <RELATIVE_PATH_OR_LINK>
-        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Spec: docs/spec.final.md§7.3,§7.4,§8.2,§9,§10
+        - Roadmap: docs/roadmap.md§5.1–5.11 (M2)
         - Related: <ISSUE_OR_PR_LINKS>
     validations:
       required: false
@@ -34,24 +34,19 @@ body:
         ## Scope
 
         ### In
-        - Scan `MET_SOURCE_DIR` for `.met` (reject subdirs; enforce flat-only)
-        - Strict `mapping.yaml` load/validate (invariants + uniqueness)
-        - Rename/replacement detection + prompts (update-in-place / skip semantics)
-        - Deterministic Plan + Preview enumerating all filesystem writes + Git side effects
-        - Approval gate: execution only after preview confirmation
-        - Archive each `.met` immediately before conversion
-        - MetaF per-file invocation → staging outputs
-        - Atomic publish into `AF_REPO_DIR` for `.af` + updated `mapping.yaml`
-        - GitAdapter: stage only planned outputs, deterministic commit message, push policy enforcement
-        - Conflict policy (`fail`, `suffix`, `fail_all`) applied before first publish write
-        - Snapshot integrity: abort if mapping snapshot hash or `METAF_BUNDLE_SHA` changes between plan/run
-        - Cancellation semantics: no partial publish to user roots; logs capture outcome
-        - Archive retention enforcement post-run
+        - **Scan inputs**: enumerate `.met` files in `MET_SOURCE_DIR` (flat) and reject subdirectories.
+        - **Mapping loader & validation**: load and strictly validate `mapping.yaml`, enforcing invariants, uniqueness and rejecting unknown keys; detect fingerprint drift and renames/replacements.
+        - **Plan & Preview**: build a deterministic Plan capturing mapping snapshot hash, toolchain fingerprint, input snapshot and intended outputs; render a Preview enumerating all filesystem writes and Git side effects; ensure stability for identical inputs.
+        - **Archiving**: before conversion, archive each `.met` input into `APP_WORK_DIR` using `before_convert` naming rules and enforce retention policies.
+        - **Conversion pipeline**: invoke MetaF per file into a staging directory; generate the next `mapping.yaml` and classify destination collisions (`existing‑mapped` vs `new‑mapped`); apply `CONFLICT_POLICY` (fail, suffix, fail_all).
+        - **Publish**: publish staged `.af` files and updated `mapping.yaml` into `AF_REPO_DIR` via atomic temp‑then‑replace; stage only planned outputs; generate deterministic commit messages (`LIGHTNING: met→af COUNT files`) and push according to `GIT_PUSH_POLICY`; enforce repository cleanliness when `REQUIRE_CLEAN_REPO=true`.
+        - **Run exclusivity & integrity checks**: acquire a run lock on (`AF_REPO_DIR`, `MET_SOURCE_DIR`); revalidate plan snapshot (mapping and bundle) before publish; abort on drift.
+        - **Archive retention**: enforce archive naming, retention and cap rules after run completion.
 
         ### Out
-        - `.af→.met` reverse pipeline
-        - Repair Mapping / Relink flows
-        - Expanded VS Code workspace management beyond “open”
+        - Bootstrapping MetaF (M1) and reverse conversion `.af→.met` workflows (M3).
+        - Repair mapping and relink workflows (M4).
+        - Logging/error code infrastructure and final hardening (M5).
 
   - type: checkboxes
     id: execution
@@ -59,20 +54,20 @@ body:
       label: Execution checklist
       description: Check as implementation items are completed.
       options:
-          - label: "Implement `.met` scan (flat-only) + change detection"
-          - label: "Implement strict `mapping.yaml` validation + invariants"
-          - label: "Implement deterministic Planner to produce a Plan snapshot"
-          - label: "Implement deterministic Preview enumerating ALL writes + Git side effects"
-          - label: "Implement approval gate (no execution without Preview confirmation)"
-          - label: "Implement archive-before-convert for each `.met`"
-          - label: "Implement MetaF runner invocation into staging outputs"
-          - label: "Implement atomic publish of `.af` outputs + `mapping.yaml` into `AF_REPO_DIR`"
-          - label: "Implement conflict policy (`fail` / `suffix` / `fail_all`) gating before publish"
-          - label: "Implement GitAdapter: stage only planned outputs + deterministic commit message + push policy"
-          - label: "Implement snapshot integrity checks (mapping snapshot hash + `METAF_BUNDLE_SHA`)"
-          - label: "Implement cancellation semantics (no partial publish to user roots)"
-          - label: "Implement archive retention enforcement post-run"
-          - label: "Add end-to-end tests for plan determinism and git guardrails"
+        - label: "Implement scanning of `MET_SOURCE_DIR` and reject subdirectories"
+        - label: "Implement strict `mapping.yaml` loader: enforce invariants, uniqueness, reject unknown keys and detect fingerprint drift"
+        - label: "Detect `.met` renames/replacements and prompt user to update or skip"
+        - label: "Implement Plan builder capturing mapping snapshot hash, toolchain fingerprint and input snapshot"
+        - label: "Implement Preview generator listing all filesystem writes and Git side effects"
+        - label: "Archive each `.met` input before conversion using `before_convert` naming"
+        - label: "Invoke MetaF per file into staging and generate next `mapping.yaml`"
+        - label: "Classify destination collisions and apply conflict policy (fail/suffix/fail_all)"
+        - label: "Publish staged `.af` and updated `mapping.yaml` into `AF_REPO_DIR` via atomic replace"
+        - label: "Stage only planned outputs; generate deterministic commit messages and push per `GIT_PUSH_POLICY`"
+        - label: "Enforce repository cleanliness when `REQUIRE_CLEAN_REPO=true`"
+        - label: "Acquire exclusivity lock; revalidate plan snapshot and abort on drift"
+        - label: "Enforce archive retention and cap after conversion"
+        - label: "Add unit/integration tests covering Plan/Preview stability, conversion pipeline, conflict policy and retention logic"
 
   - type: checkboxes
     id: dod
@@ -80,13 +75,13 @@ body:
       label: Definition of Done
       description: Check as items are satisfied.
       options:
-          - label: "Plan + Preview stable across repeated runs with identical inputs"
-          - label: "Preview completeness verified (no hidden side effects)"
-          - label: "Correct `.af` outputs + deterministic `mapping.yaml` updates"
-          - label: "Atomic publish verified (no partial writes on pre-publish failure)"
-          - label: "Git staging limited to planned outputs; commit message deterministic; push policy enforced"
-          - label: "Conflict policy behavior verified"
-          - label: "Milestone-scoped acceptance tests pass (planner/preview + pipeline + git guardrails)"
+        - label: "Plan and Preview engine produces stable output lists given identical inputs"
+        - label: "Mapping loader enforces strict schema; unknown keys or invariants cause failure with clear errors"
+        - label: "`.met→.af` conversion flows produce archived `.met` files, staged `.af` outputs and updated `mapping.yaml`"
+        - label: "Git Adapter stages only planned outputs, commits with deterministic message and respects `GIT_PUSH_POLICY`"
+        - label: "Archive retention enforcement runs after conversion"
+        - label: "Conflict policy behaviour tested across fail, suffix and fail_all scenarios"
+        - label: "Milestone‑scoped acceptance tests pass (AT‑0004–AT‑0008, AT‑0014, AT‑0019–AT‑0029, AT‑0030)"
 
   - type: checkboxes
     id: exit_artifacts
@@ -94,11 +89,13 @@ body:
       label: Exit artifacts
       description: Evidence to attach/link before closing.
       options:
-          - label: "Demo run steps + sample repo layout"
-          - label: "Evidence: staged file list matches plan (no wildcard adds)"
-          - label: "Evidence: conflict-policy tests"
-          - label: "Docs: forward conversion workflow + troubleshooting"
-          - label: "Roadmap change log updated if scope changed"
+        - label: "Plan/Preview component code and documentation"
+        - label: "Conversion pipeline and staging layout implementation"
+        - label: "Git Adapter implementation and test results"
+        - label: "Updated `mapping.yaml` and archive files"
+        - label: "User guide for `.met→.af` conversion including conflict policies and prompts"
+        - label: "Test report covering acceptance tests for this milestone"
+        - label: "Roadmap change log updated if scope changed"
 
   - type: textarea
     id: blockers

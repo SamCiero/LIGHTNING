@@ -1,10 +1,10 @@
 name: "M0 — Foundation & Configuration Setup"
-description: "Foundation: WPF shell + config + filesystem boundary enforcement."
+description: "Establish baseline WPF application, configuration parsing/validation and trust boundary enforcement."
 title: "M0 — Foundation & Configuration Setup"
 labels:
   - "milestone:M0"
   - "area:foundation"
-  - "area:config"
+  - "area:configuration"
   - "area:boundary-fs"
   - "tests"
   - "docs"
@@ -13,7 +13,11 @@ body:
     attributes:
       value: |
         ## Goal
-        Establish Windows 10+ WPF baseline with config parsing/validation and strict filesystem trust boundary enforcement.
+        Create the Windows 10+ desktop application skeleton with configuration parsing and trust‑boundary enforcement.  
+        This milestone delivers a WPF UI that lets users configure the directory roots and MetaF installation settings, implements a
+        `ConfigService` for loading and validating `config.yaml`, and adds a `BoundaryFileSystem` to enforce
+        allowed roots, canonicalization and reparse‑point policy.  All I/O must be constrained to authorised roots and
+        runs must always be explicitly user‑triggered.
 
   - type: textarea
     id: context
@@ -21,8 +25,8 @@ body:
       label: Context / Links
       description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
       placeholder: |
-        - Spec: <RELATIVE_PATH_OR_LINK>
-        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Spec: docs/spec.final.md§2,§6,§7.1,§10.2,§13
+        - Roadmap: docs/roadmap.md§5.1–5.11 (M0)
         - Related: <ISSUE_OR_PR_LINKS>
     validations:
       required: false
@@ -33,19 +37,18 @@ body:
         ## Scope
 
         ### In
-        - `ConfigService`: load/parse `config.yaml` from `APP_CONFIG_DIR` (unknown keys ignored w/ warnings)
-        - Validate roots: absolute local fixed volumes, non-overlapping, `MET_SOURCE_DIR` flat-only, `AF_REPO_DIR` is Git repo, `APP_WORK_DIR` creatable
-        - WPF UI: configure roots + MetaF install settings (placeholder UI patterns ok)
-        - `BoundaryFileSystem`: allowlisted roots, canonicalization, final-path checks, reparse policy (block by default)
-        - Run-lock / single active operation guard
-        - Basic logging: per-run logs under `APP_WORK_DIR\logs` + UI affordance to open logs
-        - VS Code integration toggle present (best-effort only, non-blocking)
+        - **`ConfigService`**: load and parse `config.yaml` stored under `APP_CONFIG_DIR`; ignore unknown keys with warnings.
+        - **Configuration validation**: require absolute local fixed volumes, non‑overlapping roots, existence and flatness of `MET_SOURCE_DIR`, `.git` presence in `AF_REPO_DIR`, and that `APP_WORK_DIR` is creatable.
+        - **WPF settings UI**: allow configuring `MET_SOURCE_DIR`, `AF_REPO_DIR`, `APP_WORK_DIR` and MetaF install settings; enforce preview/approval gating for later workflows.
+        - **`BoundaryFileSystem`**: enforce allow‑listed roots, canonicalisation, final‑path checks and the default‑block reparse‑point policy.
+        - **Gating flags & toggles**: expose settings for VS Code workspace management and other optional integrations (non‑blocking) and ensure runs are explicitly user‑triggered (no background conversions).
+        - **Run exclusivity & responsiveness**: implement a run lock to prevent concurrent operations and offload heavy work from the UI thread to maintain responsiveness.
 
         ### Out
-        - MetaF install/pinning
-        - `.met↔.af` conversion pipelines
-        - `mapping.yaml` write/repair/relink
-        - Git staging/commit/push
+        - Installing or pinning MetaF (M1).
+        - Conversion workflows (`.met→.af` or `.af→.met`), mapping repair or relink logic.
+        - Archive retention enforcement and conflict policies.
+        - Final determinism, logging and hardening (deferred to M5).
 
   - type: checkboxes
     id: execution
@@ -53,15 +56,16 @@ body:
       label: Execution checklist
       description: Check as implementation items are completed.
       options:
-          - label: "Implement `ConfigService` to load/parse `config.yaml` under `APP_CONFIG_DIR`"
-          - label: "Implement schema validation + actionable error reporting for all root paths"
-          - label: "Implement WPF settings UI for roots + MetaF settings (placeholder patterns ok)"
-          - label: "Implement `BoundaryFileSystem` canonicalization + final-path checks + allowlist enforcement"
-          - label: "Implement reparse-point detection and default-block behavior"
-          - label: "Implement run-lock / single active operation guard"
-          - label: "Implement per-run logging under `APP_WORK_DIR\\logs` + UI link/open"
-          - label: "Add feature flags / toggles for optional integrations (non-blocking)"
-          - label: "Add unit tests for boundary rules and config validation"
+        - label: "Implement `ConfigService` to load and parse `config.yaml` under `APP_CONFIG_DIR`"
+        - label: "Validate directory roots: absolute fixed volumes, non‑overlap, `MET_SOURCE_DIR` flat, `.git` in `AF_REPO_DIR`, `APP_WORK_DIR` creatable"
+        - label: "Build WPF settings UI to configure roots and MetaF install settings (placeholder patterns ok)"
+        - label: "Implement `BoundaryFileSystem` canonicalisation, final‑path checks and allow‑list enforcement"
+        - label: "Detect and block reparse points by default"
+        - label: "Add gating flags for VS Code workspace management and other optional integrations (non‑blocking)"
+        - label: "Ensure all runs are explicitly user‑triggered; implement run‑lock to prevent concurrent operations"
+        - label: "Offload heavy work (scanning/validation) off the UI thread to maintain responsiveness"
+        - label: "Add per‑run logging under `APP_WORK_DIR\logs` and UI affordance to open logs"
+        - label: "Add unit tests covering boundary rules and configuration validation"
 
   - type: checkboxes
     id: dod
@@ -69,12 +73,14 @@ body:
       label: Definition of Done
       description: Check as items are satisfied.
       options:
-          - label: "App launches on Windows 10+"
-          - label: "Config load + validation works; root validation errors are actionable"
-          - label: "Boundary rejects anything outside allowlisted roots (canonical + final path)"
-          - label: "Reparse-point policy enforced (blocked by default)"
-          - label: "Logs exist and are discoverable from UI"
-          - label: "Milestone-scoped acceptance tests pass (boundary + config + basic UX responsiveness)"
+        - label: "Foundation modules compile without errors and integrate into the UI"
+        - label: "Configuration validations enforce all rules; error messages are actionable"
+        - label: "Boundary rejects any path outside allow‑listed roots (canonical + final path)"
+        - label: "Reparse‑point policy enforced (blocked by default)"
+        - label: "All runs are explicitly user‑triggered and run‑lock prevents concurrent operations"
+        - label: "UI remains responsive during configuration and scanning"
+        - label: "Optional integrations toggles appear and default to off"
+        - label: "Milestone‑scoped acceptance tests pass (AT‑0001–AT‑0003, AT‑9001)"
 
   - type: checkboxes
     id: exit_artifacts
@@ -82,11 +88,11 @@ body:
       label: Exit artifacts
       description: Evidence to attach/link before closing.
       options:
-          - label: "Tag/commit for M0"
-          - label: "Config guide (paths, examples, common misconfigs)"
-          - label: "Boundary test evidence (test output/logs)"
-          - label: "“How to run” dev notes (build/run, config/log locations)"
-          - label: "Roadmap change log updated if scope changed"
+        - label: "Tag/commit marking M0 completion"
+        - label: "Configuration guide (paths, examples, common misconfigurations)"
+        - label: "Trust boundary test report (AT‑0002/AT‑0003 output)"
+        - label: "Developer notes: how to build/run, config/log locations, run‑lock behavior"
+        - label: "Roadmap change log updated if scope changed"
 
   - type: textarea
     id: blockers

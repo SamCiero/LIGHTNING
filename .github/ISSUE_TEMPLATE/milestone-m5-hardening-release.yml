@@ -1,11 +1,10 @@
-name: "M5 — Hardening, Observability, Determinism, and Release"
-description: "Make it releasable: determinism, transactional writes, logging/error codes, perf, upgrade/rollback, full AT suite green."
-title: "M5 — Hardening, Observability, Determinism, and Release"
+name: "M5 — Observability, Hardening & Release"
+description: "Finalize the project with determinism, logging, error handling, performance tuning and release preparation."
+title: "M5 — Observability, Hardening & Release"
 labels:
   - "milestone:M5"
   - "area:hardening"
-  - "area:logging"
-  - "area:determinism"
+  - "area:observability"
   - "area:release"
   - "tests"
   - "docs"
@@ -14,7 +13,12 @@ body:
     attributes:
       value: |
         ## Goal
-        Make the tool releasable: deterministic outputs, transactional writes, stable error codes, strong logs/redaction, perf/responsiveness, upgrade/rollback, and full AT suite green.
+        Finalize LIGHTNING by implementing determinism and reproducibility, robust logging and error handling, transactional writes,
+        UI performance optimisations and upgrade/rollback support.  
+        This milestone adds canonical hashing for identifiers, deterministic encoding and transactional writes for generated files,
+        detailed logging with secret redaction, stable error codes and an error taxonomy.  It tunes UI responsiveness during
+        scanning and conversions, documents upgrade and migration steps, and prepares release notes and a comprehensive test
+        report.  Only when all acceptance tests pass and documentation is complete is the project considered done.
 
   - type: textarea
     id: context
@@ -22,8 +26,8 @@ body:
       label: Context / Links
       description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
       placeholder: |
-        - Spec: <RELATIVE_PATH_OR_LINK>
-        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Spec: docs/spec.final.md§11,§12,§13,§14,§15
+        - Roadmap: docs/roadmap.md§5.1–5.11 (M5)
         - Related: <ISSUE_OR_PR_LINKS>
     validations:
       required: false
@@ -34,17 +38,17 @@ body:
         ## Scope
 
         ### In
-        - Determinism hardening: canonical hashing, stable ordering, UTF-8 + LF normalization for generated files
-        - Transactional write primitives applied everywhere (staging/publish/mapping updates)
-        - Logging + redaction policy; stable error code taxonomy `LIGHTNING_{CATEGORY}_{NNNN}`
-        - Perf tuning for large sets; UI responsiveness instrumentation
-        - Upgrade/migration/rollback documentation + validation checks
-        - Release packaging + release notes
-        - Full acceptance suite execution and evidence capture
+        - **Determinism**: implement canonical hashing for `MET_ID`, `AF_SHA256` and `METAF_BUNDLE_SHA` using SHA‑256; ensure deterministic encoding (line endings, ordering) for generated files.
+        - **Transactional writes**: ensure all generated files (`mapping.yaml`, workspace files, config) are written transactionally via temp file then atomic replace.
+        - **Logging & error handling**: add detailed logging to bootstrap and run workflows; redact secrets and sensitive tokens; surface stable error codes in the `LIGHTNING_{CATEGORY}_{NNNN}` format and produce an error taxonomy and exit code table.
+        - **UI performance**: optimise scanning and execution to keep the UI responsive, completing implementation of REQ‑0801.
+        - **Upgrade & rollback**: ensure upgrades do not corrupt persisted data; document supported upgrade and rollback steps and provide migration scripts for data format changes.
+        - **Documentation & release prep**: produce upgrade/migration notes, release notes, changelog entries and a comprehensive test report demonstrating all acceptance tests pass.
+        - **Testing**: run the entire suite of acceptance tests (`AT‑0001`–`AT‑0030`, `AT‑9000`, `AT‑9001`) and ensure `REQ‑1001` is satisfied.
 
         ### Out
-        - New user-visible features not required by REQs/ATs
-        - Platform expansion beyond Windows 10+
+        - New feature development or changes to conversion workflows and mapping logic.
+        - Additional integrations or optional enhancements beyond Appendix E.
 
   - type: checkboxes
     id: execution
@@ -52,15 +56,16 @@ body:
       label: Execution checklist
       description: Check as implementation items are completed.
       options:
-          - label: "Implement canonical hashing + stable ordering rules for determinism"
-          - label: "Implement UTF-8 + LF normalization for generated files"
-          - label: "Apply transactional write primitives to all publish paths and mapping updates"
-          - label: "Implement logging + redaction policy enforcement"
-          - label: "Implement stable error code taxonomy `LIGHTNING_{CATEGORY}_{NNNN}` + catalog"
-          - label: "Instrument and tune performance for large file sets; validate UI responsiveness"
-          - label: "Write/validate upgrade + migration + rollback docs"
-          - label: "Produce release package + release notes"
-          - label: "Run full acceptance suite; capture evidence; fix until green"
+        - label: "Implement canonical hashing for identifiers (`MET_ID`, `AF_SHA256`, `METAF_BUNDLE_SHA`) using SHA‑256"
+        - label: "Implement deterministic encoding and transactional writes for generated files (temp file → atomic replace)"
+        - label: "Add logging across workflows; redact secrets and sensitive tokens"
+        - label: "Surface stable error codes (`LIGHTNING_{CATEGORY}_{NNNN}`); produce error taxonomy and exit code table"
+        - label: "Optimise UI responsiveness during scanning and conversions"
+        - label: "Implement upgrade and rollback routines; provide migration scripts as needed"
+        - label: "Write upgrade/migration notes, release notes and changelog entries"
+        - label: "Run full acceptance test suite and address any failures"
+        - label: "Prepare release package including binaries and documentation"
+        - label: "Update roadmap and spec to reflect any changes"
 
   - type: checkboxes
     id: dod
@@ -68,12 +73,12 @@ body:
       label: Definition of Done
       description: Check as items are satisfied.
       options:
-          - label: "Repeated runs yield identical plan + outputs + mapping for identical inputs"
-          - label: "Atomic/transactional publish verified across all write paths"
-          - label: "Error codes stable and documented; logs redact sensitive data as required"
-          - label: "UI responsive under expected workloads; perf targets met"
-          - label: "Upgrade/rollback steps documented and validated"
-          - label: "Full acceptance suite passes (all required ATs)"
+        - label: "Canonical hashing and transactional write modules integrated and unit tested"
+        - label: "Logs redact sensitive data and error codes follow taxonomy"
+        - label: "UI performance metrics meet responsiveness goals during scanning and conversions"
+        - label: "Upgrade, migration and rollback plans documented and validated"
+        - label: "Release notes, upgrade guides, changelog and comprehensive test report completed"
+        - label: "All acceptance tests AT‑0001 through AT‑0030, AT‑9000 and AT‑9001 pass, satisfying REQ‑1001"
 
   - type: checkboxes
     id: exit_artifacts
@@ -81,12 +86,12 @@ body:
       label: Exit artifacts
       description: Evidence to attach/link before closing.
       options:
-          - label: "Determinism implementation + tests"
-          - label: "Error code catalog + logging/redaction docs"
-          - label: "Perf report (before/after) + instrumentation notes"
-          - label: "Release package + release notes + upgrade/rollback guide"
-          - label: "Comprehensive acceptance test report (evidence)"
-          - label: "Roadmap change log updated if scope changed"
+        - label: "Determinism modules and hashing tests"
+        - label: "Logging and error handling framework code and documentation"
+        - label: "Performance tuning report"
+        - label: "Release notes, upgrade instructions and rollback strategy"
+        - label: "Comprehensive acceptance test report"
+        - label: "Roadmap change log updated"
 
   - type: textarea
     id: blockers

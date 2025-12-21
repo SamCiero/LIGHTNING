@@ -1,5 +1,5 @@
 name: "M1 — MetaF Bootstrap & Installer"
-description: "Bootstrap/pin MetaF into APP_WORK_DIR and compute deterministic bundle identity."
+description: "Bootstrap and pin MetaF, compute deterministic bundle identity, write logs and avoid global state mutation."
 title: "M1 — MetaF Bootstrap & Installer"
 labels:
   - "milestone:M1"
@@ -13,7 +13,10 @@ body:
     attributes:
       value: |
         ## Goal
-        Install/pin MetaF into app-owned storage (`APP_WORK_DIR`), compute deterministic bundle identity, retain bootstrap logs, and avoid global system mutation.
+        Enable the application to install and pin MetaF into an app‑owned cache.  
+        This milestone implements a `MetaFInstaller` that supports both `repo_release_zip` and `dotnet_publish` modes, computes a canonical
+        `METAF_BUNDLE_SHA` manifest hash, persists install paths back into `config.yaml`, writes bootstrap logs with retention, and
+        performs a clean‑cache retry on failure.  Installation must not modify global machine state.
 
   - type: textarea
     id: context
@@ -21,8 +24,8 @@ body:
       label: Context / Links
       description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
       placeholder: |
-        - Spec: <RELATIVE_PATH_OR_LINK>
-        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Spec: docs/spec.final.md§8.1,§11,§12.1
+        - Roadmap: docs/roadmap.md§5.1–5.11 (M1)
         - Related: <ISSUE_OR_PR_LINKS>
     validations:
       required: false
@@ -33,18 +36,18 @@ body:
         ## Scope
 
         ### In
-        - Support install mode(s): `repo_release_zip` and/or `dotnet_publish` (per spec)
-        - `MetaFInstaller`: install into `APP_WORK_DIR` cache (idempotent verify path)
-        - Compute/persist `METAF_BUNDLE_SHA` via canonical manifest algorithm
-        - Bootstrap logs + retention (keep most recent N; delete older)
-        - One clean-cache retry on bootstrap failure
-        - UI: Install/Verify MetaF with clear status and error reporting
-        - Ensure no global machine mutation (no PATH/registry edits)
+        - **Installation modes**: support both `repo_release_zip` (download a release ZIP) and `dotnet_publish` (build from a 40‑hex commit) modes for installing MetaF.
+        - **Installer**: download/install MetaF into `APP_WORK_DIR`; verify idempotent installation and compute/persist `METAF_BUNDLE_SHA` using the canonical manifest algorithm.
+        - **Configuration update**: persist `METAF_ROOT_DIR`, `METAF_EXE_PATH` and `METAF_BUNDLE_SHA` back into `config.yaml`.
+        - **Bootstrap logs**: write logs under `APP_WORK_DIR\logs\bootstrap` and retain the most recent 50 entries.
+        - **Error handling**: on bootstrap failure, clear the cache and retry once before surfacing a stable error code.
+        - **Prerequisites**: validate the presence of required tools (`git`, `dotnet`) and optionally provision an app‑managed .NET runtime in `APP_WORK_DIR\deps\dotnet` without altering the global environment.
+        - **UI integration**: add UI to trigger install/verify MetaF, display status and allow users to open logs.
 
         ### Out
-        - `.met↔.af` pipelines
-        - `mapping.yaml` flows
-        - Git operations beyond prerequisites validation
+        - Conversion pipelines (`.met→.af` or `.af→.met`) and mapping logic.
+        - Plan/Preview generation and conflict handling.
+        - Repair mapping and relink workflows (M4).
 
   - type: checkboxes
     id: execution
@@ -52,14 +55,16 @@ body:
       label: Execution checklist
       description: Check as implementation items are completed.
       options:
-          - label: "Implement MetaF install mode(s) per config (`repo_release_zip` and/or `dotnet_publish`)"
-          - label: "Install MetaF into `APP_WORK_DIR` and verify idempotently"
-          - label: "Compute deterministic manifest and persist `METAF_BUNDLE_SHA`"
-          - label: "Write bootstrap logs and enforce retention (keep most recent N)"
-          - label: "Implement one clean-cache retry on failure"
-          - label: "Ensure installer never mutates global machine state (PATH/registry)"
-          - label: "Add UI: Install/Verify MetaF + status + open logs"
-          - label: "Add tests for manifest algorithm and retention behavior"
+        - label: "Implement support for `repo_release_zip` installation mode (download release ZIP, extract to cache)"
+        - label: "Implement support for `dotnet_publish` installation mode (build from 40‑hex commit)"
+        - label: "Install MetaF into `APP_WORK_DIR` and verify idempotently"
+        - label: "Compute canonical manifest and persist `METAF_BUNDLE_SHA`"
+        - label: "Persist `METAF_ROOT_DIR` and `METAF_EXE_PATH` to `config.yaml`"
+        - label: "Write bootstrap logs and enforce retention (keep most recent 50 logs)"
+        - label: "On failure, clear the cache and retry once before erroring"
+        - label: "Validate prerequisites (`git`, `dotnet`); optionally provision app‑managed runtime"
+        - label: "Integrate install/verify UI with status and log viewing"
+        - label: "Add unit tests for manifest algorithm, retention behaviour and retry logic"
 
   - type: checkboxes
     id: dod
@@ -67,11 +72,13 @@ body:
       label: Definition of Done
       description: Check as items are satisfied.
       options:
-          - label: "MetaF installs/verifies successfully in configured mode(s)"
-          - label: "`METAF_BUNDLE_SHA` deterministic and surfaced in app state/logs"
-          - label: "Log retention enforced"
-          - label: "Clean-cache retry works and is visible to user"
-          - label: "Milestone-scoped acceptance tests pass (installer + manifest/hash + retention)"
+        - label: "MetaF installs successfully via both supported modes and is verified via UI"
+        - label: "`METAF_BUNDLE_SHA` computed deterministically and surfaced in app state/logs"
+        - label: "Install paths persist correctly into `config.yaml`"
+        - label: "Bootstrap logs are captured and retention capped to 50 entries"
+        - label: "Clean‑cache retry executes and surfaces failure with stable error code"
+        - label: "Installer never mutates global machine state (no PATH/registry edits)"
+        - label: "Milestone‑scoped acceptance tests pass (AT‑0009–AT‑0013)"
 
   - type: checkboxes
     id: exit_artifacts
@@ -79,11 +86,12 @@ body:
       label: Exit artifacts
       description: Evidence to attach/link before closing.
       options:
-          - label: "Installer verification evidence (logs/test output)"
-          - label: "Manifest/hash unit tests + algorithm notes"
-          - label: "Log retention proof"
-          - label: "Docs: prerequisites + troubleshooting"
-          - label: "Roadmap change log updated if scope changed"
+        - label: "Installer binary/scripts and verification evidence (logs/test output)"
+        - label: "Manifest/hash unit tests and algorithm notes"
+        - label: "Log retention proof (e.g., 51st log evicted)"
+        - label: "Updated `config.yaml` documenting installed paths and bundle hash"
+        - label: "Documentation: prerequisites, troubleshooting and bootstrap workflow"
+        - label: "Roadmap change log updated if scope changed"
 
   - type: textarea
     id: blockers

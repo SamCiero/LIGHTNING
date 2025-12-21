@@ -1,9 +1,8 @@
-name: "M4 — Mapping Repair (Drift) + Relink (Moved AF)"
-description: "Handle MET source drift and AF moved/renamed relinking."
-title: "M4 — Mapping Repair (Drift) + Relink (Moved AF)"
+name: "M4 — Mapping Repair & Relink"
+description: "Implement workflows to repair mapping fingerprint drift and relink entries when .af files are moved or renamed."
+title: "M4 — Mapping Repair & Relink"
 labels:
   - "milestone:M4"
-  - "area:mapping"
   - "area:repair"
   - "area:relink"
   - "tests"
@@ -13,7 +12,11 @@ body:
     attributes:
       value: |
         ## Goal
-        Handle drift: (1) `MET_SOURCE_DIR` moved/changed (fingerprint mismatch) and (2) `.af` moved/renamed in repo.
+        Provide workflows to repair the mapping file when the fingerprint of `MET_SOURCE_DIR` drifts and to relink mapping entries when `.af` files are moved or renamed.  
+        This milestone detects fingerprint mismatches, offers a Repair Mapping UI that recomputes the fingerprint, rescans
+        `MET_SOURCE_DIR`, deterministically activates or retires items and writes `mapping.yaml` transactionally.  It also offers a
+        Relink workflow to match missing entries by size and hash or allow users to locate or skip missing `.af` files within `AF_REPO_DIR`.
+        Plan/Preview output should incorporate these repair and relink outcomes.
 
   - type: textarea
     id: context
@@ -21,8 +24,8 @@ body:
       label: Context / Links
       description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
       placeholder: |
-        - Spec: <RELATIVE_PATH_OR_LINK>
-        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Spec: docs/spec.final.md§8.4,§8.5,§7.3
+        - Roadmap: docs/roadmap.md§5.1–5.11 (M4)
         - Related: <ISSUE_OR_PR_LINKS>
     validations:
       required: false
@@ -33,16 +36,15 @@ body:
         ## Scope
 
         ### In
-        - Detect `MET_SOURCE_ROOT_FINGERPRINT` mismatch; block conversions; route to Repair Mapping
-        - Repair Mapping: rescan `.met`, deterministically activate/retire/update entries, transactional write of `mapping.yaml`
-        - Cancel semantics: Repair cancel produces no writes to user roots
-        - Relink: missing `AF_REL` → match by size then SHA-256; auto-update only if unique
-        - Locate/Skip UI: Locate constrained to `AF_REPO_DIR`; Skip leaves unresolved safely
-        - Integrate Repair/Relink outcomes into Plan/Preview + logs
+        - **Fingerprint drift detection**: at run start, detect when the `MET_SOURCE_ROOT_FINGERPRINT` no longer matches the stored fingerprint; block conversion until repair is performed.
+        - **Repair Mapping**: compute a new fingerprint, rescan `MET_SOURCE_DIR`, deterministically set item states to `active` or `retired`, update `MET_REL` and retire timestamps, enforce invariants and write `mapping.yaml` transactionally; allow cancellation with no writes.
+        - **Relink workflow**: when referenced `AF_REL` is missing or unmapped `.af` files exist, search by size and hash; if exactly one match, update `AF_REL`; otherwise prompt the user to locate within `AF_REPO_DIR` or skip; restrict location selection to `AF_REPO_DIR`.
+        - **Plan/Preview integration**: update the Plan/Preview engine to include Repair and Relink outcomes so users can review changes before committing.
 
         ### Out
-        - New conversion features unrelated to repair/relink
-        - Heuristic relink without hash confirmation
+        - Conversion pipelines (`.met→.af` and `.af→.met`).
+        - Bootstrapping and logging hardening.
+        - Modifying naming or sanitisation algorithms.
 
   - type: checkboxes
     id: execution
@@ -50,13 +52,13 @@ body:
       label: Execution checklist
       description: Check as implementation items are completed.
       options:
-          - label: "Implement drift detection (fingerprint mismatch) that blocks conversions"
-          - label: "Implement Repair Mapping workflow with deterministic activate/retire/update rules"
-          - label: "Ensure Repair Mapping writes `mapping.yaml` transactionally; cancel = no writes"
-          - label: "Implement Relink workflow for missing `AF_REL` using size+SHA-256 matching"
-          - label: "Implement Locate constrained to `AF_REPO_DIR` and Skip behavior"
-          - label: "Surface repair/relink status and decisions in Plan/Preview + logs"
-          - label: "Add tests for drift detection, repair determinism, relink uniqueness, and cancel semantics"
+        - label: "Detect fingerprint drift at run start and block conversions until repair is offered"
+        - label: "Implement Repair Mapping workflow: recompute fingerprint, rescan `MET_SOURCE_DIR`, set item states to active/retired, update `MET_REL`/retire timestamps and write `mapping.yaml` transactionally"
+        - label: "Support cancellation of Repair Mapping with no writes"
+        - label: "Implement Relink workflow: search for missing entries by size/hash; if one match update `AF_REL`; otherwise prompt user to locate within `AF_REPO_DIR` or skip"
+        - label: "Restrict locate selections to `AF_REPO_DIR` and enforce invariants and deterministic naming when updating entries"
+        - label: "Update Plan/Preview engine to display repair and relink outcomes"
+        - label: "Add unit/integration tests covering drift detection, repair mapping determinism and transactional writes, relink matching and UI prompts"
 
   - type: checkboxes
     id: dod
@@ -64,10 +66,11 @@ body:
       label: Definition of Done
       description: Check as items are satisfied.
       options:
-          - label: "Drift detection reliably blocks and offers repair path"
-          - label: "Repair writes `mapping.yaml` transactionally + deterministically; cancel = no writes"
-          - label: "Relink matches correct and constrained; ambiguous matches require explicit decision"
-          - label: "Milestone-scoped acceptance tests pass (drift/repair + relink + cancel semantics)"
+        - label: "Repair Mapping detects fingerprint drift, shows preview of activations/retirements and writes updated `mapping.yaml` only on approval"
+        - label: "Relink workflow matches missing entries by size/hash and restricts locate selections to `AF_REPO_DIR`; user can choose locate or skip"
+        - label: "Cancelling Repair Mapping or Relink produces no writes"
+        - label: "Plan/Preview includes repair and relink outcomes"
+        - label: "Milestone‑scoped acceptance tests pass (AT‑0017, AT‑0018)"
 
   - type: checkboxes
     id: exit_artifacts
@@ -75,11 +78,11 @@ body:
       label: Exit artifacts
       description: Evidence to attach/link before closing.
       options:
-          - label: "Drift simulation evidence (mismatch → repair → resolved)"
-          - label: "Relink simulation evidence (moved `.af` → relink success)"
-          - label: "Cancel/no-write evidence for both flows"
-          - label: "Docs: drift and relink playbooks"
-          - label: "Roadmap change log updated if scope changed"
+        - label: "Repair Mapping module code and test report"
+        - label: "Relink module code and test report"
+        - label: "Updated documentation describing when to repair mapping and how to use relink"
+        - label: "Decision log noting activation/retirement rules and relink choices"
+        - label: "Roadmap change log updated if scope changed"
 
   - type: textarea
     id: blockers
