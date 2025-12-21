@@ -1,0 +1,124 @@
+name: "M2 — Forward Conversion (.met→.af) + Git Publish"
+description: "Plan/Preview → approve → archive → stage → publish → Git for `.met→.af`."
+title: "M2 — Forward Conversion Pipeline (.met→.af) + Git Publish"
+labels:
+  - "milestone:M2"
+  - "area:pipeline"
+  - "area:planner"
+  - "area:preview"
+  - "area:git"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Deliver deterministic Plan/Preview → approve → archive → stage → publish → Git for `.met→.af`.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - Scan `MET_SOURCE_DIR` for `.met` (reject subdirs; enforce flat-only)
+        - Strict `mapping.yaml` load/validate (invariants + uniqueness)
+        - Rename/replacement detection + prompts (update-in-place / skip semantics)
+        - Deterministic Plan + Preview enumerating all filesystem writes + Git side effects
+        - Approval gate: execution only after preview confirmation
+        - Archive each `.met` immediately before conversion
+        - MetaF per-file invocation → staging outputs
+        - Atomic publish into `AF_REPO_DIR` for `.af` + updated `mapping.yaml`
+        - GitAdapter: stage only planned outputs, deterministic commit message, push policy enforcement
+        - Conflict policy (`fail`, `suffix`, `fail_all`) applied before first publish write
+        - Snapshot integrity: abort if mapping snapshot hash or `METAF_BUNDLE_SHA` changes between plan/run
+        - Cancellation semantics: no partial publish to user roots; logs capture outcome
+        - Archive retention enforcement post-run
+
+        ### Out
+        - `.af→.met` reverse pipeline
+        - Repair Mapping / Relink flows
+        - Expanded VS Code workspace management beyond “open”
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement `.met` scan (flat-only) + change detection"
+          - label: "Implement strict `mapping.yaml` validation + invariants"
+          - label: "Implement deterministic Planner to produce a Plan snapshot"
+          - label: "Implement deterministic Preview enumerating ALL writes + Git side effects"
+          - label: "Implement approval gate (no execution without Preview confirmation)"
+          - label: "Implement archive-before-convert for each `.met`"
+          - label: "Implement MetaF runner invocation into staging outputs"
+          - label: "Implement atomic publish of `.af` outputs + `mapping.yaml` into `AF_REPO_DIR`"
+          - label: "Implement conflict policy (`fail` / `suffix` / `fail_all`) gating before publish"
+          - label: "Implement GitAdapter: stage only planned outputs + deterministic commit message + push policy"
+          - label: "Implement snapshot integrity checks (mapping snapshot hash + `METAF_BUNDLE_SHA`)"
+          - label: "Implement cancellation semantics (no partial publish to user roots)"
+          - label: "Implement archive retention enforcement post-run"
+          - label: "Add end-to-end tests for plan determinism and git guardrails"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "Plan + Preview stable across repeated runs with identical inputs"
+          - label: "Preview completeness verified (no hidden side effects)"
+          - label: "Correct `.af` outputs + deterministic `mapping.yaml` updates"
+          - label: "Atomic publish verified (no partial writes on pre-publish failure)"
+          - label: "Git staging limited to planned outputs; commit message deterministic; push policy enforced"
+          - label: "Conflict policy behavior verified"
+          - label: "Milestone-scoped acceptance tests pass (planner/preview + pipeline + git guardrails)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Demo run steps + sample repo layout"
+          - label: "Evidence: staged file list matches plan (no wildcard adds)"
+          - label: "Evidence: conflict-policy tests"
+          - label: "Docs: forward conversion workflow + troubleshooting"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false

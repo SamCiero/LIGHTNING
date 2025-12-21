@@ -1,0 +1,112 @@
+name: "M5 — Hardening, Observability, Determinism, and Release"
+description: "Make it releasable: determinism, transactional writes, logging/error codes, perf, upgrade/rollback, full AT suite green."
+title: "M5 — Hardening, Observability, Determinism, and Release"
+labels:
+  - "milestone:M5"
+  - "area:hardening"
+  - "area:logging"
+  - "area:determinism"
+  - "area:release"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Make the tool releasable: deterministic outputs, transactional writes, stable error codes, strong logs/redaction, perf/responsiveness, upgrade/rollback, and full AT suite green.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - Determinism hardening: canonical hashing, stable ordering, UTF-8 + LF normalization for generated files
+        - Transactional write primitives applied everywhere (staging/publish/mapping updates)
+        - Logging + redaction policy; stable error code taxonomy `LIGHTNING_{CATEGORY}_{NNNN}`
+        - Perf tuning for large sets; UI responsiveness instrumentation
+        - Upgrade/migration/rollback documentation + validation checks
+        - Release packaging + release notes
+        - Full acceptance suite execution and evidence capture
+
+        ### Out
+        - New user-visible features not required by REQs/ATs
+        - Platform expansion beyond Windows 10+
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement canonical hashing + stable ordering rules for determinism"
+          - label: "Implement UTF-8 + LF normalization for generated files"
+          - label: "Apply transactional write primitives to all publish paths and mapping updates"
+          - label: "Implement logging + redaction policy enforcement"
+          - label: "Implement stable error code taxonomy `LIGHTNING_{CATEGORY}_{NNNN}` + catalog"
+          - label: "Instrument and tune performance for large file sets; validate UI responsiveness"
+          - label: "Write/validate upgrade + migration + rollback docs"
+          - label: "Produce release package + release notes"
+          - label: "Run full acceptance suite; capture evidence; fix until green"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "Repeated runs yield identical plan + outputs + mapping for identical inputs"
+          - label: "Atomic/transactional publish verified across all write paths"
+          - label: "Error codes stable and documented; logs redact sensitive data as required"
+          - label: "UI responsive under expected workloads; perf targets met"
+          - label: "Upgrade/rollback steps documented and validated"
+          - label: "Full acceptance suite passes (all required ATs)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Determinism implementation + tests"
+          - label: "Error code catalog + logging/redaction docs"
+          - label: "Perf report (before/after) + instrumentation notes"
+          - label: "Release package + release notes + upgrade/rollback guide"
+          - label: "Comprehensive acceptance test report (evidence)"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false

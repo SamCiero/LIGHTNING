@@ -1,0 +1,109 @@
+name: "M1 — MetaF Bootstrap & Installer"
+description: "Bootstrap/pin MetaF into APP_WORK_DIR and compute deterministic bundle identity."
+title: "M1 — MetaF Bootstrap & Installer"
+labels:
+  - "milestone:M1"
+  - "area:metaf"
+  - "area:bootstrap"
+  - "area:installer"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Install/pin MetaF into app-owned storage (`APP_WORK_DIR`), compute deterministic bundle identity, retain bootstrap logs, and avoid global system mutation.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - Support install mode(s): `repo_release_zip` and/or `dotnet_publish` (per spec)
+        - `MetaFInstaller`: install into `APP_WORK_DIR` cache (idempotent verify path)
+        - Compute/persist `METAF_BUNDLE_SHA` via canonical manifest algorithm
+        - Bootstrap logs + retention (keep most recent N; delete older)
+        - One clean-cache retry on bootstrap failure
+        - UI: Install/Verify MetaF with clear status and error reporting
+        - Ensure no global machine mutation (no PATH/registry edits)
+
+        ### Out
+        - `.met↔.af` pipelines
+        - `mapping.yaml` flows
+        - Git operations beyond prerequisites validation
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement MetaF install mode(s) per config (`repo_release_zip` and/or `dotnet_publish`)"
+          - label: "Install MetaF into `APP_WORK_DIR` and verify idempotently"
+          - label: "Compute deterministic manifest and persist `METAF_BUNDLE_SHA`"
+          - label: "Write bootstrap logs and enforce retention (keep most recent N)"
+          - label: "Implement one clean-cache retry on failure"
+          - label: "Ensure installer never mutates global machine state (PATH/registry)"
+          - label: "Add UI: Install/Verify MetaF + status + open logs"
+          - label: "Add tests for manifest algorithm and retention behavior"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "MetaF installs/verifies successfully in configured mode(s)"
+          - label: "`METAF_BUNDLE_SHA` deterministic and surfaced in app state/logs"
+          - label: "Log retention enforced"
+          - label: "Clean-cache retry works and is visible to user"
+          - label: "Milestone-scoped acceptance tests pass (installer + manifest/hash + retention)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Installer verification evidence (logs/test output)"
+          - label: "Manifest/hash unit tests + algorithm notes"
+          - label: "Log retention proof"
+          - label: "Docs: prerequisites + troubleshooting"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false

@@ -1,0 +1,111 @@
+name: "M3 — Reverse Conversion (.af→.met)"
+description: "Reverse pipeline using strict mapping with overwrite archiving + atomic publish."
+title: "M3 — Reverse Conversion Pipeline (.af→.met)"
+labels:
+  - "milestone:M3"
+  - "area:pipeline"
+  - "area:planner"
+  - "area:preview"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Implement `.af→.met` using strict mapping, staging, overwrite-archiving, and atomic publish to `MET_SOURCE_DIR`.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - Require valid strict `mapping.yaml` before reverse conversion
+        - Plan/Preview for reverse flow enumerating all writes (incl. overwrite archives)
+        - MetaF per entry → staging outputs
+        - Archive destination `.met` immediately before overwrite
+        - Atomic publish into `MET_SOURCE_DIR` (temp-then-replace)
+        - Snapshot integrity checks (mapping snapshot hash + `METAF_BUNDLE_SHA`)
+        - Cancellation semantics: no partial publish to user roots
+        - Archive retention enforcement post-run
+
+        ### Out
+        - Repair Mapping drift workflow
+        - Relink `.af` move/rename workflow
+        - Fallback/guessing behavior if mapping invalid
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement strict mapping gate for reverse conversions"
+          - label: "Implement reverse Planner + Preview (enumerate all writes + overwrite archives)"
+          - label: "Invoke MetaF per entry into staging outputs"
+          - label: "Implement archive-before-overwrite for destination `.met` files"
+          - label: "Implement atomic publish into `MET_SOURCE_DIR` (temp-then-replace)"
+          - label: "Reuse snapshot integrity checks (mapping snapshot hash + `METAF_BUNDLE_SHA`)"
+          - label: "Implement cancellation semantics (no partial publish to user roots)"
+          - label: "Enforce archive retention post-run"
+          - label: "Add tests for overwrite-archive and atomic publish failure modes"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "Reverse preview completeness verified (all writes/archives enumerated)"
+          - label: "Correct `.met` outputs produced per mapping"
+          - label: "Overwrite archives created and retained per policy"
+          - label: "Atomic publish verified for `MET_SOURCE_DIR`"
+          - label: "Milestone-scoped acceptance tests pass (reverse pipeline + overwrite archive + atomic publish)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Round-trip demo steps (M2 then M3)"
+          - label: "Evidence: overwrite-archive behavior"
+          - label: "Failure-mode evidence: no partial user-root writes pre-publish"
+          - label: "Docs: reverse conversion workflow"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false

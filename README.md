@@ -1,4 +1,4 @@
-# Empyrean Codex: LIGHTNING
+﻿# Empyrean Codex: LIGHTNING
 
 Date: 2025-12-15  
 Target platform: Windows 10+ (local-only)  
@@ -187,13 +187,13 @@ MetaF (M1):
 - `metaf_ref` (branch/tag/SHA requested)
 - `metaf_sha` (resolved pinned commit SHA)
 - `metaf_exe_path` (resolved cached executable)
-- `metaf_install_mode` (`repo_release_zip|dotnet_publish`)
+- `metaf_install_mode` (`repo_release_zip | dotnet_publish`)
 
 Policies:
 
 - `reparse_point_policy` (`block` default)
-- `conflict_policy` (`skip|overwrite|version_suffix`)
-- `git_push_policy` (`never|manual|auto`)
+- `conflict_policy` (`skip | overwrite | version_suffix`)
+- `git_push_policy` (`never | manual | auto`)
 
 VS Code:
 
@@ -500,3 +500,4 @@ Deliverable: users can run M1/M2 flows on machines missing prerequisites, using 
 - **Archive:** local-only store of `.met` keyed by hash; not committed.
 - **Mapping:** committed YAML describing stable `.met` identity and corresponding `.af` path in repo.
 - **Plan:** immutable list of intended operations produced by planner before execution.
+

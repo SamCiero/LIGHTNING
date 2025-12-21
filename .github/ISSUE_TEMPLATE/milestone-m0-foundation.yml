@@ -1,0 +1,112 @@
+name: "M0 — Foundation & Configuration Setup"
+description: "Foundation: WPF shell + config + filesystem boundary enforcement."
+title: "M0 — Foundation & Configuration Setup"
+labels:
+  - "milestone:M0"
+  - "area:foundation"
+  - "area:config"
+  - "area:boundary-fs"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Establish Windows 10+ WPF baseline with config parsing/validation and strict filesystem trust boundary enforcement.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - `ConfigService`: load/parse `config.yaml` from `APP_CONFIG_DIR` (unknown keys ignored w/ warnings)
+        - Validate roots: absolute local fixed volumes, non-overlapping, `MET_SOURCE_DIR` flat-only, `AF_REPO_DIR` is Git repo, `APP_WORK_DIR` creatable
+        - WPF UI: configure roots + MetaF install settings (placeholder UI patterns ok)
+        - `BoundaryFileSystem`: allowlisted roots, canonicalization, final-path checks, reparse policy (block by default)
+        - Run-lock / single active operation guard
+        - Basic logging: per-run logs under `APP_WORK_DIR\logs` + UI affordance to open logs
+        - VS Code integration toggle present (best-effort only, non-blocking)
+
+        ### Out
+        - MetaF install/pinning
+        - `.met↔.af` conversion pipelines
+        - `mapping.yaml` write/repair/relink
+        - Git staging/commit/push
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement `ConfigService` to load/parse `config.yaml` under `APP_CONFIG_DIR`"
+          - label: "Implement schema validation + actionable error reporting for all root paths"
+          - label: "Implement WPF settings UI for roots + MetaF settings (placeholder patterns ok)"
+          - label: "Implement `BoundaryFileSystem` canonicalization + final-path checks + allowlist enforcement"
+          - label: "Implement reparse-point detection and default-block behavior"
+          - label: "Implement run-lock / single active operation guard"
+          - label: "Implement per-run logging under `APP_WORK_DIR\logs` + UI link/open"
+          - label: "Add feature flags / toggles for optional integrations (non-blocking)"
+          - label: "Add unit tests for boundary rules and config validation"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "App launches on Windows 10+"
+          - label: "Config load + validation works; root validation errors are actionable"
+          - label: "Boundary rejects anything outside allowlisted roots (canonical + final path)"
+          - label: "Reparse-point policy enforced (blocked by default)"
+          - label: "Logs exist and are discoverable from UI"
+          - label: "Milestone-scoped acceptance tests pass (boundary + config + basic UX responsiveness)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Tag/commit for M0"
+          - label: "Config guide (paths, examples, common misconfigs)"
+          - label: "Boundary test evidence (test output/logs)"
+          - label: "“How to run” dev notes (build/run, config/log locations)"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false

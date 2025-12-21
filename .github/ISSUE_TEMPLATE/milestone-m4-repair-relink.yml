@@ -1,0 +1,105 @@
+name: "M4 — Mapping Repair (Drift) + Relink (Moved AF)"
+description: "Handle MET source drift and AF moved/renamed relinking."
+title: "M4 — Mapping Repair (Drift) + Relink (Moved AF)"
+labels:
+  - "milestone:M4"
+  - "area:mapping"
+  - "area:repair"
+  - "area:relink"
+  - "tests"
+  - "docs"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Goal
+        Handle drift: (1) `MET_SOURCE_DIR` moved/changed (fingerprint mismatch) and (2) `.af` moved/renamed in repo.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / Links
+      description: Link spec sections, roadmap sections, prior issues/PRs, and any relevant notes.
+      placeholder: |
+        - Spec: <RELATIVE_PATH_OR_LINK>
+        - Roadmap: <RELATIVE_PATH_OR_LINK>
+        - Related: <ISSUE_OR_PR_LINKS>
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Scope
+
+        ### In
+        - Detect `MET_SOURCE_ROOT_FINGERPRINT` mismatch; block conversions; route to Repair Mapping
+        - Repair Mapping: rescan `.met`, deterministically activate/retire/update entries, transactional write of `mapping.yaml`
+        - Cancel semantics: Repair cancel produces no writes to user roots
+        - Relink: missing `AF_REL` → match by size then SHA-256; auto-update only if unique
+        - Locate/Skip UI: Locate constrained to `AF_REPO_DIR`; Skip leaves unresolved safely
+        - Integrate Repair/Relink outcomes into Plan/Preview + logs
+
+        ### Out
+        - New conversion features unrelated to repair/relink
+        - Heuristic relink without hash confirmation
+
+  - type: checkboxes
+    id: execution
+    attributes:
+      label: Execution checklist
+      description: Check as implementation items are completed.
+      options:
+          - label: "Implement drift detection (fingerprint mismatch) that blocks conversions"
+          - label: "Implement Repair Mapping workflow with deterministic activate/retire/update rules"
+          - label: "Ensure Repair Mapping writes `mapping.yaml` transactionally; cancel = no writes"
+          - label: "Implement Relink workflow for missing `AF_REL` using size+SHA-256 matching"
+          - label: "Implement Locate constrained to `AF_REPO_DIR` and Skip behavior"
+          - label: "Surface repair/relink status and decisions in Plan/Preview + logs"
+          - label: "Add tests for drift detection, repair determinism, relink uniqueness, and cancel semantics"
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      description: Check as items are satisfied.
+      options:
+          - label: "Drift detection reliably blocks and offers repair path"
+          - label: "Repair writes `mapping.yaml` transactionally + deterministically; cancel = no writes"
+          - label: "Relink matches correct and constrained; ambiguous matches require explicit decision"
+          - label: "Milestone-scoped acceptance tests pass (drift/repair + relink + cancel semantics)"
+
+  - type: checkboxes
+    id: exit_artifacts
+    attributes:
+      label: Exit artifacts
+      description: Evidence to attach/link before closing.
+      options:
+          - label: "Drift simulation evidence (mismatch → repair → resolved)"
+          - label: "Relink simulation evidence (moved `.af` → relink success)"
+          - label: "Cancel/no-write evidence for both flows"
+          - label: "Docs: drift and relink playbooks"
+          - label: "Roadmap change log updated if scope changed"
+
+  - type: textarea
+    id: blockers
+    attributes:
+      label: Blockers / Risks
+      description: List concrete blockers, risks, and mitigation steps.
+      placeholder: |
+        - Blocker:
+        - Risk:
+        - Mitigation:
+    validations:
+      required: false
+
+  - type: textarea
+    id: pr_links
+    attributes:
+      label: PR links / commits
+      description: Add links to PRs or commit SHAs implementing this milestone work.
+      placeholder: |
+        - PR:
+        - Commit:
+    validations:
+      required: false
