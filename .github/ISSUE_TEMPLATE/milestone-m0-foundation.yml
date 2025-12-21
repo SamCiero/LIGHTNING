@@ -59,7 +59,7 @@ body:
           - label: "Implement `BoundaryFileSystem` canonicalization + final-path checks + allowlist enforcement"
           - label: "Implement reparse-point detection and default-block behavior"
           - label: "Implement run-lock / single active operation guard"
-          - label: "Implement per-run logging under `APP_WORK_DIR\logs` + UI link/open"
+          - label: "Implement per-run logging under `APP_WORK_DIR\\logs` + UI link/open"
           - label: "Add feature flags / toggles for optional integrations (non-blocking)"
           - label: "Add unit tests for boundary rules and config validation"
 
