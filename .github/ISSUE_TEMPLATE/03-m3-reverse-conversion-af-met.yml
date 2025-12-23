@@ -11,9 +11,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M3 — Reverse Conversion (.af→.met)\n\n## Goal\nImplement the `.af→.met`\
       \ conversion workflow that uses the existing `mapping.yaml` to determine destination\
       \ paths within `MET_SOURCE_DIR`, validates mapping fields strictly, builds Plan/Preview,\

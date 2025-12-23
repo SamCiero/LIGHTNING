@@ -11,9 +11,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M5 — Observability, Hardening & Release\n\n## Goal\nFinalize the LIGHTNING\
       \ project by implementing determinism and reproducibility, robust logging and\
       \ error handling, transactional writes for generated files, UI performance optimizations\

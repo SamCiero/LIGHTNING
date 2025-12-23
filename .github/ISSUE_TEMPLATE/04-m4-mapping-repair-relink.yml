@@ -11,9 +11,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M4 — Mapping Repair & Relink\n\n## Goal\nImplement workflows to repair\
       \ the mapping file when the fingerprint of `MET_SOURCE_DIR` drifts and to relink\
       \ mapping entries when `.af` files are moved or renamed. This milestone updates\

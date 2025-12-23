@@ -10,8 +10,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M0 — Foundation & Configuration Setup\n\n## Goal\nEstablish a baseline\
       \ Windows 10+ desktop application that enforces trust boundaries, parses and\
       \ validates configuration, provides a basic WPF UI for configuring roots and\

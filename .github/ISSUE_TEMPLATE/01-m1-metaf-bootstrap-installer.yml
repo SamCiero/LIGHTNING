@@ -10,9 +10,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M1 — MetaF Bootstrap & Installer\n\n## Goal\nEnable the application\
       \ to bootstrap and pin MetaF in an app‑owned cache. This milestone installs\
       \ MetaF using either a release ZIP or a dotnet publish, computes the canonical\

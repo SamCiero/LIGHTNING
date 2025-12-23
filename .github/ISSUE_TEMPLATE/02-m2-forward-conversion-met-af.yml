@@ -12,9 +12,8 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
-    description: This field is prefilled so you can click Submit without typing. Edit
-      as needed.
+    label: Progress Checklist
+    description: What needs to be completed for this milestone?
     value: "# M2 — Forward Conversion (.met→.af)\n\n## Goal\nImplement the deterministic\
       \ `.met→.af` conversion workflow that scans the `MET_SOURCE_DIR`, loads and\
       \ validates `mapping.yaml`, builds a deterministic Plan and Preview enumerating\
