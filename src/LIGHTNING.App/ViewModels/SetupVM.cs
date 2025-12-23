@@ -21,9 +21,11 @@ public sealed partial class SetupVM : ObservableObject
 
     private bool _suspendAutoSave;
 
-    private string _metSourceDir = "";
-    private string _afRepoDir = "";
-    private string _appWorkDir = "";
+    private string _metSourceDir = string.Empty;
+    private string _afRepoDir = string.Empty;
+    private string _appWorkDir = string.Empty;
+
+    private bool _enableVsCodeIntegration;
 
     private string _status = "Not saved yet.";
 
@@ -62,7 +64,7 @@ public sealed partial class SetupVM : ObservableObject
         get => _metSourceDir;
         set
         {
-            string next = (value ?? "").Trim();
+            string next = (value ?? string.Empty).Trim();
             if (SetProperty(ref _metSourceDir, next))
                 OnConfigChanged();
         }
@@ -73,7 +75,7 @@ public sealed partial class SetupVM : ObservableObject
         get => _afRepoDir;
         set
         {
-            string next = (value ?? "").Trim();
+            string next = (value ?? string.Empty).Trim();
             if (SetProperty(ref _afRepoDir, next))
                 OnConfigChanged();
         }
@@ -84,8 +86,22 @@ public sealed partial class SetupVM : ObservableObject
         get => _appWorkDir;
         set
         {
-            string next = (value ?? "").Trim();
+            string next = (value ?? string.Empty).Trim();
             if (SetProperty(ref _appWorkDir, next))
+                OnConfigChanged();
+        }
+    }
+
+    /// <summary>
+    /// Toggle for the optional VS Code integration.  Changing this value triggers
+    /// immediate revalidation and auto‑save when the config is valid.
+    /// </summary>
+    public bool EnableVsCodeIntegration
+    {
+        get => _enableVsCodeIntegration;
+        set
+        {
+            if (SetProperty(ref _enableVsCodeIntegration, value))
                 OnConfigChanged();
         }
     }
@@ -116,15 +132,28 @@ public sealed partial class SetupVM : ObservableObject
     {
         _suspendAutoSave = true;
 
+        bool hadParseError = false;
+
+        LightningConfig? cfg = null;
         try
         {
-            LightningConfig? cfg = _configStore.TryLoad();
+            cfg = _configStore.TryLoad();
+        }
+        catch (Exception ex)
+        {
+            hadParseError = true;
+            // Surface parse errors as status; leave cfg null so defaults apply
+            Status = $"Failed to parse config: {ex.Message}";
+        }
 
+        try
+        {
             if (cfg is not null)
             {
-                MetSourceDir = cfg.MetSourceDir ?? "";
-                AfRepoDir = cfg.AfRepoDir ?? "";
-                AppWorkDir = cfg.AppWorkDir ?? "";
+                MetSourceDir = cfg.MetSourceDir ?? string.Empty;
+                AfRepoDir = cfg.AfRepoDir ?? string.Empty;
+                AppWorkDir = cfg.AppWorkDir ?? string.Empty;
+                EnableVsCodeIntegration = cfg.EnableVsCodeIntegration;
 
                 if (_fsProvider.Current.FileExists(_paths.ConfigPath))
                     LastSavedAt = _fsProvider.Current.GetLastWriteTime(_paths.ConfigPath);
@@ -133,9 +162,12 @@ public sealed partial class SetupVM : ObservableObject
             if (string.IsNullOrWhiteSpace(AppWorkDir))
                 AppWorkDir = Path.Combine(_paths.ConfigDirectory, "work");
 
-            Status = cfg is null
-                ? "No config found yet. Pick folders to create one."
-                : "Config loaded. Changes auto-save when valid.";
+            if (!hadParseError)
+            {
+                Status = cfg is null
+                    ? "No config found yet. Pick folders to create one."
+                    : "Config loaded. Changes auto-save when valid.";
+            }
         }
         finally
         {
@@ -188,13 +220,14 @@ public sealed partial class SetupVM : ObservableObject
             Version = 1,
             MetSourceDir = MetSourceDir,
             AfRepoDir = AfRepoDir,
-            AppWorkDir = AppWorkDir
+            AppWorkDir = AppWorkDir,
+            EnableVsCodeIntegration = EnableVsCodeIntegration
         };
 
         ValidationErrors.Clear();
         var errors = LightningConfigValidator.Validate(cfg);
-        for (int i = 0; i < errors.Count; i++)
-            ValidationErrors.Add(errors[i]);
+        foreach (string err in errors)
+            ValidationErrors.Add(err);
 
         IsValid = ValidationErrors.Count == 0;
 
@@ -204,6 +237,7 @@ public sealed partial class SetupVM : ObservableObject
             return;
         }
 
+        // Build runtime boundary with config dir and allowed roots
         IBoundaryPolicy runtimePolicy = new BoundaryPolicy(new[]
         {
             _paths.ConfigDirectory,
@@ -214,10 +248,11 @@ public sealed partial class SetupVM : ObservableObject
 
         BoundaryFileSystem runtimeFs = new BoundaryFileSystem(runtimePolicy);
 
+        // Ensure work directory exists (and thus is allowed)
         runtimeFs.EnsureDirectoryExists(cfg.AppWorkDir);
 
+        // Update global FS and save config
         _fsProvider.SetCurrent(runtimeFs);
-
         _configStore.Save(cfg);
 
         LastSavedAt = DateTime.Now;

@@ -8,5 +8,55 @@
         Title="LIGHTNING"
         Width="900"
         Height="560">
-  <views:SetupView />
+
+  <DockPanel>
+
+    <!-- Top: classic Windows menu bar -->
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Open Config Folder"
+                  Command="{Binding OpenConfigFolderCommand}" />
+        <Separator />
+        <MenuItem Header="E_xit"
+                  Command="{Binding ExitCommand}" />
+      </MenuItem>
+
+      <MenuItem Header="_View">
+        <MenuItem Header="_Settings"
+                  Command="{Binding GoToSettingsCommand}" />
+        <MenuItem Header="_Install Settings"
+                  Command="{Binding GoToInstallSettingsCommand}" />
+        <MenuItem Header="_Diagnostics"
+                  Command="{Binding GoToDiagnosticsCommand}" />
+      </MenuItem>
+
+      <MenuItem Header="_Help">
+        <MenuItem Header="_About"
+                  Command="{Binding AboutCommand}" />
+      </MenuItem>
+    </Menu>
+
+    <!-- Bottom: status bar -->
+    <StatusBar DockPanel.Dock="Bottom">
+      <StatusBarItem>
+        <TextBlock Text="{Binding Status}" />
+      </StatusBarItem>
+    </StatusBar>
+
+    <!-- Center: your existing tabs, now controlled by MainVM -->
+    <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+      <TabItem Header="Settings">
+        <views:SetupView />
+      </TabItem>
+
+      <TabItem Header="Install Settings">
+        <views:InstallSettingsView />
+      </TabItem>
+
+      <TabItem Header="Diagnostics">
+        <views:DiagnosticsView />
+      </TabItem>
+    </TabControl>
+
+  </DockPanel>
 </Window>

@@ -14,6 +14,8 @@
         <ApplicationDefinition Update="App.xaml" />
         <Page Update="MainWindow.xaml" />
         <Page Update="Views\SetupView.xaml" />
+        <Page Update="Views\InstallSettingsView.xaml" />
+        <Page Update="Views\DiagnosticsView.xaml" />
     </ItemGroup>
 
     <ItemGroup>

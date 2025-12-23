@@ -6,18 +6,20 @@
              xmlns:vm="clr-namespace:LIGHTNING.App.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:DesignSetupVM, IsDesignTimeCreatable=True}">
-
   <Grid Margin="16">
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
+    <!-- Title -->
     <StackPanel Grid.Row="0" Margin="0,0,0,12">
       <TextBlock Text="Setup" FontSize="22" FontWeight="SemiBold" />
     </StackPanel>
 
+    <!-- Root selection UI -->
     <Grid Grid.Row="1" Margin="0,0,0,12">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="220" />
@@ -49,11 +51,20 @@
                  Command="{Binding BrowseAppWorkDirCommand}" />
     </Grid>
 
-    <Border Grid.Row="2" Padding="12" BorderThickness="1" CornerRadius="6">
+    <!-- Optional integrations and install settings -->
+    <StackPanel Grid.Row="2" Margin="0,0,0,12">
+      <TextBlock Text="Optional Integrations" FontWeight="SemiBold" Margin="0,0,0,4" />
+      <CheckBox Content="VS Code integration" IsChecked="{Binding EnableVsCodeIntegration}" />
+      <Separator Margin="0,10,0,10" />
+      <TextBlock Text="MetaF Install Settings (M1 Placeholder)" FontWeight="SemiBold" Margin="0,0,0,4" />
+      <TextBlock Text="This section will be implemented in Milestone 1." Opacity="0.6" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <!-- Validation & config info -->
+    <Border Grid.Row="3" Padding="12" BorderThickness="1" CornerRadius="6">
       <StackPanel>
         <TextBlock Text="Validation" FontWeight="SemiBold" Margin="0,0,0,4" />
         <TextBlock Text="{Binding ValidationSummary}" Opacity="0.75" Margin="0,0,0,8" />
-
         <ItemsControl ItemsSource="{Binding ValidationErrors}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
@@ -61,19 +72,16 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
-
         <Separator Margin="0,10,0,10" />
-
         <Button Content="CONFIG FILE"
-        Command="{Binding OpenConfigFolderCommand}"
-        FontWeight="SemiBold"
-        FontSize="12"
-        Padding="4,4"
-        HorizontalAlignment="Left"
-        Margin="0,0,0,8"
-        BorderThickness="1"
-        Cursor="Arrow" />
-
+                Command="{Binding OpenConfigFolderCommand}"
+                FontWeight="SemiBold"
+                FontSize="12"
+                Padding="4,4"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,8"
+                BorderThickness="1"
+                Cursor="Arrow" />
         <TextBlock Text="{Binding ConfigPath}" Opacity="0.75" TextWrapping="Wrap" />
       </StackPanel>
     </Border>

@@ -64,7 +64,7 @@ public sealed class BoundaryFileSystem
         {
             var attrs = File.GetAttributes(path);
             if ((attrs & FileAttributes.ReparsePoint) != 0)
-                throw new BoundaryViolationException($"Reparse point blocked: {Path.GetFullPath(path)}");
+                throw new ReparsePolicyViolationException($"Reparse point blocked: {Path.GetFullPath(path)}");
         }
     }
 
@@ -77,7 +77,7 @@ public sealed class BoundaryFileSystem
         {
             var attrs = File.GetAttributes(cursor);
             if ((attrs & FileAttributes.ReparsePoint) != 0)
-                throw new BoundaryViolationException($"Reparse point blocked: {cursor}");
+                throw new ReparsePolicyViolationException($"Reparse point blocked: {cursor}");
 
             string? parent = Path.GetDirectoryName(cursor);
             if (string.IsNullOrWhiteSpace(parent) || parent == cursor)

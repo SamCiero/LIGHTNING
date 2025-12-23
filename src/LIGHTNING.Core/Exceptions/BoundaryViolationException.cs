@@ -1,8 +1,12 @@
-using System;
-
 namespace LIGHTNING.Core.Exceptions;
 
-public sealed class BoundaryViolationException : Exception
+public class BoundaryViolationException : System.Exception
 {
-    public BoundaryViolationException(string message) : base(message) { }
+    public BoundaryViolationException() { }
+
+    public BoundaryViolationException(string message)
+        : base(message) { }
+
+    public BoundaryViolationException(string message, System.Exception innerException)
+        : base(message, innerException) { }
 }
