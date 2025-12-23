@@ -1,0 +1,72 @@
+name: M0 — Foundation & Configuration Setup
+description: Tracking issue for M0 (Foundation & Configuration Setup) — prefilled
+  checklist from roadmap.final.md.
+title: M0 — Foundation & Configuration Setup
+labels:
+- milestone:M0
+- area:foundation
+- docs
+- tests
+body:
+- type: textarea
+  id: milestone_body
+  attributes:
+    label: Milestone issue body (prefilled)
+    description: This field is prefilled so you can click Submit without typing. Edit
+      as needed.
+    value: "# M0 — Foundation & Configuration Setup\n\n## Goal\nEstablish a baseline\
+      \ Windows 10+ desktop application that enforces trust boundaries, parses and\
+      \ validates configuration, provides a basic WPF UI for configuring roots and\
+      \ MetaF installation, and ensures all user‑content I/O occurs within allowed\
+      \ roots. This milestone also implements optional integrations gating and ensures\
+      \ the UI remains responsive during scanning and configuration.\n\n## In Scope\n\
+      - Implement `ConfigService` to load and parse `config.yaml` stored under `APP_CONFIG_DIR`\
+      \ with lenient unknown key handling.\n- Validate configuration keys: absolute\
+      \ local paths, non‑overlapping fixed volumes, existence and flatness of `MET_SOURCE_DIR`,\
+      \ `.git` presence in `AF_REPO_DIR`, and creatability of `APP_WORK_DIR`.\n- Provide\
+      \ UI to configure directory roots and MetaF install settings; enforce preview/approval\
+      \ gating for actions as a placeholder for later workflows.\n- Implement `BoundaryFileSystem`\
+      \ enforcing allowed roots, canonicalization, final‑path checks, and reparse\
+      \ point policy.\n- Implement gating flags for VS Code workspace management and\
+      \ optional integrations (no blocking if absent).\n- Enforce that conversion\
+      \ runs are user‑triggered; no background conversions.\n- Ensure UI offloads\
+      \ heavy work off the UI thread for responsiveness.\n\n## Out of Scope\n- Actual\
+      \ MetaF installation and execution (handled in M1).\n- Conversion workflows\
+      \ (`.met→.af` or `.af→.met`) and Git publish mechanics.\n- Repair mapping or\
+      \ relink features.\n- Archive retention enforcement and conflict policies.\n\
+      - Final determinism, logging and error handling (deferred to M5).\n\n## Milestone\
+      \ checklist\n\n### Acceptance criteria (DoD)\n- [ ] Foundation modules compiled\
+      \ without errors and integrated into UI.\n- [ ] All mapping configuration validations\
+      \ implemented and verified.\n- [ ] Boundary enforcement passes AT‑0001, AT‑0002\
+      \ and AT‑0003.\n- [ ] UI is responsive during configuration and scanning.\n\
+      - [ ] Optional integrations gating toggles appear and default to off.\n- [ ]\
+      \ Initial documentation and guides published.\n\n### Exit artifacts\n- [ ] Release\
+      \ notes entry for baseline features.\n- [ ] Changelog entry describing configuration\
+      \ validation and trust boundary.\n- [ ] Test report demonstrating success of\
+      \ AT‑0001, AT‑0002, AT‑0003.\n- [ ] Configuration guide published.\n- [ ] Security\
+      \ review notes for boundary enforcement.\n\n## Links / evidence\n- Spec sections:\
+      \ \n- Roadmap section: \n- Related issues/PRs: \n\n## Notes / decisions\n"
+  validations:
+    required: true
+- type: textarea
+  id: blockers
+  attributes:
+    label: Blockers / risks
+    description: What could stop this milestone? Include mitigation if known.
+    placeholder: '- Blocker:
+
+      - Risk:
+
+      - Mitigation:'
+  validations:
+    required: false
+- type: textarea
+  id: pr_links
+  attributes:
+    label: PR links / commits
+    description: Add links to PRs or commit SHAs implementing this milestone work.
+    placeholder: '- PR:
+
+      - Commit:'
+  validations:
+    required: false

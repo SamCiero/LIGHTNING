@@ -1,0 +1,87 @@
+name: M2 — Forward Conversion (.met→.af)
+description: Tracking issue for M2 (Forward Conversion (.met→.af)) — prefilled checklist
+  from roadmap.final.md.
+title: M2 — Forward Conversion (.met→.af)
+labels:
+- milestone:M2
+- area:forward-conversion
+- area:planner
+- area:git
+- docs
+- tests
+body:
+- type: textarea
+  id: milestone_body
+  attributes:
+    label: Milestone issue body (prefilled)
+    description: This field is prefilled so you can click Submit without typing. Edit
+      as needed.
+    value: "# M2 — Forward Conversion (.met→.af)\n\n## Goal\nImplement the deterministic\
+      \ `.met→.af` conversion workflow that scans the `MET_SOURCE_DIR`, loads and\
+      \ validates `mapping.yaml`, builds a deterministic Plan and Preview enumerating\
+      \ all intended writes and Git side effects, stages and archives `.met` files,\
+      \ invokes MetaF for each file, and publishes `.af` outputs plus an updated `mapping.yaml`\
+      \ into `AF_REPO_DIR` via atomic operations. This milestone also enforces archive\
+      \ naming, retention policies and commit message conventions.\n\n## In Scope\n\
+      - Scan `MET_SOURCE_DIR` (flat) for `.met` files; reject directories under the\
+      \ root.\n- Load and strictly validate `mapping.yaml`, enforcing key invariants\
+      \ and uniqueness for `MET_REL` and `AF_REL`.\n- Detect `.met` renames/replacements:\
+      \ update `MET_REL` in mapping or prompt the user to update‑in‑place or skip.\n\
+      - Build a deterministic Plan capturing mapping snapshot hash, toolchain fingerprint,\
+      \ inputs snapshot and intended outputs; ensure Plan stability for identical\
+      \ inputs.\n- Render Preview enumerating all filesystem writes and Git side effects.\n\
+      - On user approval, archive each `.met` input immediately before conversion\
+      \ using `before_convert` naming rules.\n- Invoke MetaF per file into a staging\
+      \ directory and generate the next `mapping.yaml`.\n- Classify destination collisions\
+      \ (`existing-mapped` vs `new-mapped`) and apply `CONFLICT_POLICY` (fail, suffix,\
+      \ fail_all) before Publish.\n- Publish staged `.af` files and `mapping.yaml`\
+      \ into `AF_REPO_DIR` via atomic temp‑then‑replace; stage and commit only planned\
+      \ outputs and push based on `GIT_PUSH_POLICY`.\n- Generate deterministic commit\
+      \ messages: `LIGHTNING: met→af COUNT files`.\n- Enforce repo cleanliness if\
+      \ `REQUIRE_CLEAN_REPO=true`.\n- Run plan snapshot integrity checks before Publish\
+      \ and abort if mapping or toolchain changed.\n- Acquire a run exclusivity lock\
+      \ on the tuple (`AF_REPO_DIR`, `MET_SOURCE_DIR`).\n- Apply archive retention\
+      \ and cap enforcement after the run completes.\n\n## Out of Scope\n- Bootstrapping\
+      \ MetaF (handled in M1).\n- Reverse conversion (`.af→.met`) flows (M3).\n- Repair\
+      \ mapping and relink features (M4).\n- Logging/error code infrastructure (M5).\n\
+      - Non‑flat `MET_SOURCE_DIR` (such runs fail fast by design).\n\n## Milestone\
+      \ checklist\n\n### Acceptance criteria (DoD)\n- [ ] Plan and Preview engine\
+      \ produces stable output lists given identical inputs.\n- [ ] Mapping loader\
+      \ enforces strict schema and fails on unknown keys or invariants.\n- [ ] `.met→.af`\
+      \ conversion flows produce archived `.met` files, staged `.af` outputs and updated\
+      \ `mapping.yaml`.\n- [ ] Git Adapter stages only planned outputs, commits with\
+      \ deterministic message and respects `GIT_PUSH_POLICY`.\n- [ ] Archive retention\
+      \ enforcement runs after conversion.\n- [ ] Conflict policy behavior tested\
+      \ across fail, suffix and fail_all.\n- [ ] AT‑0004, AT‑0005, AT‑0006, AT‑0007,\
+      \ AT‑0008, AT‑0014, AT‑0019, AT‑0020, AT‑0021, AT‑0022, AT‑0026, AT‑0027, AT‑0028,\
+      \ AT‑0029, AT‑0030 pass.\n\n### Exit artifacts\n- [ ] Plan/Preview component\
+      \ and documentation.\n- [ ] Conversion pipeline code and staging layout.\n-\
+      \ [ ] Git Adapter implementation and test results.\n- [ ] Updated `mapping.yaml`\
+      \ and archive files.\n- [ ] User guide for `.met→.af` conversion.\n- [ ] Test\
+      \ report covering acceptance tests for this milestone.\n\n## Links / evidence\n\
+      - Spec sections: \n- Roadmap section: \n- Related issues/PRs: \n\n## Notes /\
+      \ decisions\n"
+  validations:
+    required: true
+- type: textarea
+  id: blockers
+  attributes:
+    label: Blockers / risks
+    description: What could stop this milestone? Include mitigation if known.
+    placeholder: '- Blocker:
+
+      - Risk:
+
+      - Mitigation:'
+  validations:
+    required: false
+- type: textarea
+  id: pr_links
+  attributes:
+    label: PR links / commits
+    description: Add links to PRs or commit SHAs implementing this milestone work.
+    placeholder: '- PR:
+
+      - Commit:'
+  validations:
+    required: false
