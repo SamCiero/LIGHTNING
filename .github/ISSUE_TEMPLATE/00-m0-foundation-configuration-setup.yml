@@ -10,7 +10,6 @@ body:
 - type: textarea
   id: milestone_body
   attributes:
-    label: Milestone issue body (prefilled)
     description: This field is prefilled so you can click Submit without typing. Edit
       as needed.
     value: "# M0 — Foundation & Configuration Setup\n\n## Goal\nEstablish a baseline\
