@@ -1,6 +1,5 @@
 name: M5 — Observability, Hardening & Release
-description: Tracking issue for M5 (Observability, Hardening & Release) — prefilled
-  checklist from roadmap.final.md.
+description: Tracking issue for M5 (Observability, Hardening & Release)
 title: M5 — Observability, Hardening & Release
 labels:
 - milestone:M5

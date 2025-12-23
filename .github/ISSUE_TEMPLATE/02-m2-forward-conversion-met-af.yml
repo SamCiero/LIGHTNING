@@ -1,6 +1,5 @@
 name: M2 — Forward Conversion (.met→.af)
-description: Tracking issue for M2 (Forward Conversion (.met→.af)) — prefilled checklist
-  from roadmap.final.md.
+description: Tracking issue for M2 (Forward Conversion (.met→.af))
 title: M2 — Forward Conversion (.met→.af)
 labels:
 - milestone:M2

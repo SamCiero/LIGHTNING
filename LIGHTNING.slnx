@@ -11,6 +11,15 @@
     <File Path="tools/publish.cmd" />
     <File Path="tools/publish.ps1" />
   </Folder>
+  <Folder Name="/Solution Items/ISSUE_TEMPLATES/">
+    <File Path=".github/ISSUE_TEMPLATE/00-m0-foundation-configuration-setup.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/01-m1-metaf-bootstrap-installer.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/02-m2-forward-conversion-met-af.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/03-m3-reverse-conversion-af-met.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/04-m4-mapping-repair-relink.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/05-m5-observability-hardening-release.yml" />
+    <File Path=".github/ISSUE_TEMPLATE/config.yml" />
+  </Folder>
   <Project Path="src/LIGHTNING.Adapters/LIGHTNING.Adapters.csproj" />
   <Project Path="src/LIGHTNING.App/LIGHTNING.App.csproj" />
   <Project Path="src/LIGHTNING.Core/LIGHTNING.Core.csproj" />

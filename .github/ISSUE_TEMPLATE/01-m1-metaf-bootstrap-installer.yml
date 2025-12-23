@@ -1,6 +1,5 @@
 name: M1 — MetaF Bootstrap & Installer
-description: Tracking issue for M1 (MetaF Bootstrap & Installer) — prefilled checklist
-  from roadmap.final.md.
+description: Tracking issue for M1 (MetaF Bootstrap & Installer)
 title: M1 — MetaF Bootstrap & Installer
 labels:
 - milestone:M1

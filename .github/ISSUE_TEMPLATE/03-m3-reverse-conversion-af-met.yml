@@ -1,6 +1,5 @@
 name: M3 — Reverse Conversion (.af→.met)
-description: Tracking issue for M3 (Reverse Conversion (.af→.met)) — prefilled checklist
-  from roadmap.final.md.
+description: Tracking issue for M3 (Reverse Conversion (.af→.met))
 title: M3 — Reverse Conversion (.af→.met)
 labels:
 - milestone:M3
