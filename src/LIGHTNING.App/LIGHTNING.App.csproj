@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<!-- src/LIGHTNING.App/LIGHTNING.App.csproj -->
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
@@ -9,13 +10,17 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
-    <!-- Force XAML to be treated as WPF compile inputs -->
+    <!-- XAML compilation: be explicit and match the current repo structure -->
     <ItemGroup>
-        <ApplicationDefinition Update="App.xaml" />
-        <Page Update="MainWindow.xaml" />
-        <Page Update="Views\SetupView.xaml" />
-        <Page Update="Views\InstallSettingsView.xaml" />
-        <Page Update="Views\DiagnosticsView.xaml" />
+        <ApplicationDefinition Update="App.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <SubType>Designer</SubType>
+        </ApplicationDefinition>
+
+        <Page Update="UI\Views\**\*.xaml">
+            <Generator>MSBuild:Compile</Generator>
+            <SubType>Designer</SubType>
+        </Page>
     </ItemGroup>
 
     <ItemGroup>
@@ -26,6 +31,14 @@
     <ItemGroup>
         <ProjectReference Include="..\LIGHTNING.Adapters\LIGHTNING.Adapters.csproj" />
         <ProjectReference Include="..\LIGHTNING.Core\LIGHTNING.Core.csproj" />
+    </ItemGroup>
+
+    <!-- Optional: folder placeholders (not required for build; keep only if you want them visible in VS) -->
+    <ItemGroup>
+        <Folder Include="UI\DesignTime\Dashboard\" />
+        <Folder Include="UI\DesignTime\Settings\Tabs\" />
+        <Folder Include="UI\ViewModels\Settings\Tabs\" />
+        <Folder Include="UI\Views\Dashboard\" />
     </ItemGroup>
 
 </Project>

@@ -2,11 +2,11 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 
-namespace LIGHTNING.App.ViewModels;
+namespace LIGHTNING.App.UI.DesignTime.SetupWizard;
 
-public sealed class DesignSetupVM
+public sealed class SetupWizardDesignVM
 {
-    public DesignSetupVM()
+    public SetupWizardDesignVM()
     {
         // No-op commands (designer wants ICommand; these keep bindings happy)
         BrowseMetSourceDirCommand = new RelayCommand(() => MetSourceDir = MetSourceDir);
@@ -21,6 +21,8 @@ public sealed class DesignSetupVM
     public string MetSourceDir { get; set; } = @"C:\met-source";
     public string AfRepoDir { get; set; } = @"C:\repos\af";
     public string AppWorkDir { get; set; } = @"C:\work\lightning";
+
+    public bool EnableVsCodeIntegration { get; set; } = true;
 
     public string ConfigPath { get; set; } =
         @"C:\Users\<USER>\AppData\Local\EmpyreanCodex\LIGHTNING\config.yml";

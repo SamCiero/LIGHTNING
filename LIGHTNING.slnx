@@ -8,6 +8,7 @@
     <File Path="docs/mapping.example.yaml" />
     <File Path="docs/roadmap.md" />
     <File Path="docs/spec.md" />
+    <File Path="navigation.schema.yaml" />
     <File Path="tools/publish.cmd" />
     <File Path="tools/publish.ps1" />
   </Folder>

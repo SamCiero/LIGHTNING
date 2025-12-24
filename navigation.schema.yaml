@@ -1,0 +1,268 @@
+schema_version: 1
+
+gates:
+  setup_wizard:
+    description: "Setup is the only visible page until config is valid + saved and user clicks Confirm."
+    confirmed_when:
+      All:
+        - config_valid: true
+        - config_saved: true
+    confirm_sets:
+      setup_confirmed: true
+    initial_route: "setup.wizard"
+    success_route: "dashboard.root"
+
+dashboard:
+  route: "dashboard.root"
+  title: "EC: LIGHTNING"
+  show_tabs: false
+
+# PRIMARY NAV #
+menu:
+  - id: home
+    type: button
+    header: "_Home"
+    route: "dashboard.root"
+    gating:
+      All:
+        - setup_confirmed: true
+
+  - id: config
+    type: menu
+    header: "_Config"
+    gating:
+      All:
+        - setup_confirmed: true
+    items:
+      - id: go_config_global
+        header: "_Global Settings"
+        route: "settings.root"
+        tab: "global"
+      - id: go_repo_settings
+        header: "_Repo Settings"
+        route: "settings.root"
+        tab: "repo"
+      - id: open_install_settings
+        header: "_Install Settings"
+        route: "settings.root"
+        tab: "install"
+      - separator: true
+      - id: open_config_folder
+        header: "_Open Config Folder"
+        command: "OpenConfigFolder"
+        gating:
+          All:
+            - workdir_valid: true
+
+  - id: met
+    type: menu
+    header: "_MET"
+    gating:
+      All:
+        - setup_confirmed: true
+        - sourcedir_valid: true
+    items:
+      - id: convert_met_af
+        header: "_Convert .MET -> .AF"
+        route: "met_af.root"
+        tab: "plan"
+        gating:
+          All:
+            - afrepo_valid: true
+      - separator: true
+      - id: opensourcedir
+        header: "_Open VTank Folder"
+        command: "OpenSourceDir"
+
+  - id: af
+    type: menu
+    header: "_AF"
+    gating:
+      All:
+        - setup_confirmed: true
+    items:
+      - id: convert_af_met
+        header: "_Convert .AF -> .MET"
+        route: "af_met.root"
+        tab: "plan"
+      - separator: true
+      - id: openlocalrepo
+        header: "_Open Local Repo"
+        command: "OpenAFRepo"
+
+  - id: git
+    type: menu
+    header: "_Git"
+    gating:
+      All:
+        - setup_confirmed: true
+        - git_connected: true
+        - Not:
+            Any:
+              - offline_mode: true
+              - readonly_mode: true
+    items:
+      - id: pushgit
+        header: "_Push to Git"
+        route: "git.root"
+        tab: "confirmstatus"
+        gating:
+          All:
+            - changes_pending: true
+      - separator: true
+      - id: remote
+        header: "_Open Remote Repo"
+        command: "OpenRemoteRepo"
+        gating:
+          All:
+            - remote_connected: true
+
+  - id: help
+    type: menu
+    header: "_Help"
+    gating:
+      Always: true
+    items:
+      - id: tutorial
+        header: "_Tutorial"
+        command: "OpenTutorial"
+      - id: logs
+        header: "_Open Logs"
+        command: "OpenLogs"
+      - id: diagnostics
+        header: "_Diagnostics"
+        route: "triage.root"
+        tab: "diagnostics"
+      - id: bugreport
+        header: "_Report Bug"
+        route: "triage.root"
+        tab: "bugreport"
+      - separator: true
+      - id: about
+        header: "_About"
+        route: "triage.root"
+        tab: "about"
+      - id: exit
+        header: "E_xit"
+        command: "Exit"
+
+# ROUTE REGISTRY
+routes:
+  # Setup Wizard (only route accessible before setup_confirmed)
+  - id: setup.wizard
+    title: "Setup"
+    view: "SetupWizardView"
+    viewmodel: "SetupWizardVM"
+    chrome:
+      show_tabs: false
+      show_menu: true          # Help stays available via menu gating
+    confirm:
+      visible: true
+      label: "Confirm"
+      enabled_when_ref: "gates.setup_wizard.confirmed_when"
+      on_confirm:
+        apply_gate: "setup_wizard"   # applies confirm_sets + navigates to success_route
+
+  # Dashboard (no tabs)
+  - id: dashboard.root
+    title: "EC: LIGHTNING"
+    view: "<DASHBOARD_VIEW_TBD>"     # UI/Views/Dashboard/DashboardView.xaml (not present yet)
+    viewmodel: "DashboardVM"
+    chrome:
+      show_tabs: false
+      show_menu: true
+
+  # Settings (tabs within this major group)
+  - id: settings.root
+    title: "Settings"
+    view: "SettingsView"
+    viewmodel: "SettingsVM"
+    chrome:
+      show_tabs: true
+      show_menu: true
+    tabs:
+      # Planned tabs referenced by menu (not present yet)
+      - id: global
+        header: "Global Settings"
+        view: "<GLOBAL_SETTINGS_VIEW_TBD>"
+        viewmodel: "<GLOBAL_SETTINGS_VM_TBD>"
+
+      - id: repo
+        header: "Repo Settings"
+        view: "<REPO_SETTINGS_VIEW_TBD>"
+        viewmodel: "<REPO_SETTINGS_VM_TBD>"
+
+      # Tabs that exist today
+      - id: install
+        header: "Install Settings"
+        view: "InstallSettingsView"
+        viewmodel: null     # uses SettingsVM unless you later introduce Settings/Tabs VMs
+
+      - id: diagnostics
+        header: "Diagnostics"
+        view: "DiagnosticsView"
+        viewmodel: null     # uses SettingsVM unless you later introduce Settings/Tabs VMs
+
+  # MET -> AF flow (planned)
+  - id: met_af.root
+    title: "MET → AF"
+    view: "<MET_AF_ROOT_VIEW_TBD>"
+    viewmodel: "<MET_AF_ROOT_VM_TBD>"
+    chrome:
+      show_tabs: true
+      show_menu: true
+    tabs:
+      - id: plan
+        header: "Plan"
+        view: "<MET_AF_PLAN_VIEW_TBD>"
+        viewmodel: "<MET_AF_PLAN_VM_TBD>"
+
+  # AF -> MET flow (planned)
+  - id: af_met.root
+    title: "AF → MET"
+    view: "<AF_MET_ROOT_VIEW_TBD>"
+    viewmodel: "<AF_MET_ROOT_VM_TBD>"
+    chrome:
+      show_tabs: true
+      show_menu: true
+    tabs:
+      - id: plan
+        header: "Plan"
+        view: "<AF_MET_PLAN_VIEW_TBD>"
+        viewmodel: "<AF_MET_PLAN_VM_TBD>"
+
+  # Git flow (planned)
+  - id: git.root
+    title: "Git"
+    view: "<GIT_ROOT_VIEW_TBD>"
+    viewmodel: "<GIT_ROOT_VM_TBD>"
+    chrome:
+      show_tabs: true
+      show_menu: true
+    tabs:
+      - id: confirmstatus
+        header: "Confirm / Status"
+        view: "<GIT_CONFIRMSTATUS_VIEW_TBD>"
+        viewmodel: "<GIT_CONFIRMSTATUS_VM_TBD>"
+
+  # Help/Triage group (planned)
+  - id: triage.root
+    title: "Help"
+    view: "<TRIAGE_ROOT_VIEW_TBD>"
+    viewmodel: "<TRIAGE_ROOT_VM_TBD>"
+    chrome:
+      show_tabs: true
+      show_menu: true
+    tabs:
+      - id: diagnostics
+        header: "Diagnostics"
+        view: "<TRIAGE_DIAGNOSTICS_VIEW_TBD>"
+        viewmodel: "<TRIAGE_DIAGNOSTICS_VM_TBD>"
+      - id: bugreport
+        header: "Report Bug"
+        view: "<TRIAGE_BUGREPORT_VIEW_TBD>"
+        viewmodel: "<TRIAGE_BUGREPORT_VM_TBD>"
+      - id: about
+        header: "About"
+        view: "<TRIAGE_ABOUT_VIEW_TBD>"
+        viewmodel: "<TRIAGE_ABOUT_VM_TBD>"

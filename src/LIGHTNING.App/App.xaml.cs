@@ -1,8 +1,11 @@
+// src/LIGHTNING.App/App.xaml.cs
 using System.Windows;
 using LIGHTNING.Adapters.Config;
 using LIGHTNING.Adapters.Filesystem;
 using LIGHTNING.App.Services;
-using LIGHTNING.App.ViewModels;
+using LIGHTNING.App.UI.ViewModels.SetupWizard;
+using LIGHTNING.App.UI.ViewModels.Shell;
+using LIGHTNING.App.UI.Views.Shell;
 using LIGHTNING.Core.Policies;
 using LIGHTNING.Core.Services;
 
@@ -13,6 +16,8 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
 
         IAppPaths paths = new DefaultAppPaths();
 
@@ -26,10 +31,13 @@ public partial class App : Application
         IDialogService dialogs = new OokiiDialogService();
         IShellService shell = new WindowsShellService();
 
-        SetupVM setupVm = new SetupVM(configStore, dialogs, shell, fsProvider, paths);
+        var setupVm = new SetupWizardVM(configStore, dialogs, shell, fsProvider, paths);
         setupVm.Initialize();
 
-        MainWindow window = new MainWindow { DataContext = setupVm };
+        var shellVm = new ShellVM(setupVm);
+
+        var window = new ShellWindow { DataContext = shellVm };
+        MainWindow = window;
         window.Show();
     }
 }

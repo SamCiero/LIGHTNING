@@ -1,0 +1,72 @@
+<UserControl x:Class="LIGHTNING.App.UI.Views.Shell.ShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vmSetup="clr-namespace:LIGHTNING.App.UI.ViewModels.SetupWizard"
+             xmlns:vmSettings="clr-namespace:LIGHTNING.App.UI.ViewModels.Settings"
+             xmlns:viewSetup="clr-namespace:LIGHTNING.App.UI.Views.SetupWizard"
+             xmlns:viewSettings="clr-namespace:LIGHTNING.App.UI.Views.Settings"
+             mc:Ignorable="d">
+
+  <UserControl.Resources>
+    <!-- View resolution by VM type (no outer tabs needed) -->
+    <DataTemplate DataType="{x:Type vmSetup:SetupWizardVM}">
+      <viewSetup:SetupWizardView />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vmSettings:SettingsVM}">
+      <viewSettings:SettingsView />
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <DockPanel>
+
+    <!-- Top: menu (will later become your primary navigation schema) -->
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Open Config Folder"
+                  Command="{Binding OpenConfigFolderCommand}" />
+        <Separator />
+        <MenuItem Header="E_xit"
+                  Command="{Binding ExitCommand}" />
+      </MenuItem>
+
+      <!-- During setup, navigation is disabled (SetupWizard is the only page). -->
+      <MenuItem Header="_View" IsEnabled="{Binding IsSetupConfirmed}">
+        <MenuItem Header="_Settings"
+                  Command="{Binding GoToSettingsCommand}" />
+        <Separator />
+        <MenuItem Header="_Install Settings"
+                  Command="{Binding GoToInstallSettingsCommand}" />
+        <MenuItem Header="_Diagnostics"
+                  Command="{Binding GoToDiagnosticsCommand}" />
+      </MenuItem>
+
+      <!-- Temporary: lets you proceed without adding a Confirm button yet.
+           You can remove this once SetupWizard has its own Confirm button. -->
+      <MenuItem Header="_Setup" Visibility="{Binding SetupMenuVisibility}">
+        <MenuItem Header="_Confirm"
+                  Command="{Binding ConfirmSetupCommand}" />
+      </MenuItem>
+
+      <MenuItem Header="_Help">
+        <MenuItem Header="_About"
+                  Command="{Binding AboutCommand}" />
+      </MenuItem>
+    </Menu>
+
+    <!-- Bottom: status (avoid StatusBar template edge-cases) -->
+    <Border DockPanel.Dock="Bottom"
+            BorderThickness="1,1,1,0"
+            Padding="8">
+      <TextBlock Text="{Binding Status}"
+                 TextWrapping="NoWrap"
+                 TextTrimming="CharacterEllipsis" />
+    </Border>
+
+    <!-- Center: ONE page at a time -->
+    <ContentControl Content="{Binding CurrentPage}" />
+
+  </DockPanel>
+</UserControl>

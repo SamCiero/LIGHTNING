@@ -9,9 +9,9 @@ using LIGHTNING.Core.Config;
 using LIGHTNING.Core.Policies;
 using LIGHTNING.Core.Services;
 
-namespace LIGHTNING.App.ViewModels;
+namespace LIGHTNING.App.UI.ViewModels.SetupWizard;
 
-public sealed partial class SetupVM : ObservableObject
+public sealed partial class SetupWizardVM : ObservableObject
 {
     private readonly IConfigStore _configStore;
     private readonly IDialogService _dialogs;
@@ -37,7 +37,7 @@ public sealed partial class SetupVM : ObservableObject
     [NotifyPropertyChangedFor(nameof(ValidationSummary))]
     private DateTime? lastSavedAt;
 
-    public SetupVM(
+    public SetupWizardVM(
         IConfigStore configStore,
         IDialogService dialogs,
         IShellService shell,

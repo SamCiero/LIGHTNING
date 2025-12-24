@@ -1,11 +1,11 @@
-<UserControl x:Class="LIGHTNING.App.Views.SetupView"
+<UserControl x:Class="LIGHTNING.App.UI.Views.SetupWizard.SetupWizardView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:LIGHTNING.App.ViewModels"
+             xmlns:dt="clr-namespace:LIGHTNING.App.UI.DesignTime.SetupWizard;assembly=LIGHTNING.App"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=vm:DesignSetupVM, IsDesignTimeCreatable=True}">
+             d:DataContext="{d:DesignInstance Type={x:Type dt:SetupWizardDesignVM}, IsDesignTimeCreatable=True}">
   <Grid Margin="16">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -57,7 +57,7 @@
       <CheckBox Content="VS Code integration" IsChecked="{Binding EnableVsCodeIntegration}" />
       <Separator Margin="0,10,0,10" />
       <TextBlock Text="MetaF Install Settings (M1 Placeholder)" FontWeight="SemiBold" Margin="0,0,0,4" />
-      <TextBlock Text="This section will be implemented in Milestone 1." Opacity="0.6" TextWrapping="Wrap" />
+      <TextBlock Text="This section will be implemented in Milestone 1." Opacity="0.6" TextWrapping="Wrap" />
     </StackPanel>
 
     <!-- Validation & config info -->
@@ -85,5 +85,6 @@
         <TextBlock Text="{Binding ConfigPath}" Opacity="0.75" TextWrapping="Wrap" />
       </StackPanel>
     </Border>
+
   </Grid>
 </UserControl>
