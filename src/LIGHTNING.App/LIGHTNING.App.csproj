@@ -10,6 +10,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+      <None Remove="Assets\Navigation\navigation.schema.yaml" />
+    </ItemGroup>
+
     <!-- XAML compilation: be explicit and match the current repo structure -->
     <ItemGroup>
         <ApplicationDefinition Update="App.xaml">
@@ -39,6 +43,10 @@
         <Folder Include="UI\DesignTime\Settings\Tabs\" />
         <Folder Include="UI\ViewModels\Settings\Tabs\" />
         <Folder Include="UI\Views\Dashboard\" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="Assets\Navigation\navigation.schema.yaml" />
+        <Resource Include="Assets\Navigation\navigation.schema.yaml" />
     </ItemGroup>
 
 </Project>
